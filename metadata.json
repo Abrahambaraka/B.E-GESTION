@@ -1,0 +1,6 @@
+{
+  "name": "Blessing Event - Gestion RH & Logistique",
+  "description": "Plateforme de gestion opérationnelle pour l'agence événementielle Blessing Event : RH (hôtesses, serveurs, protocoles, émargement) et Logistique (mobilier, tenues, matériel, stocks).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
