@@ -16,13 +16,20 @@ import {
   Calendar,
   Plus,
   Edit,
-  Trash2
+  Trash2,
+  FileDown
 } from 'lucide-react';
 import { AddUniformModal } from './AddUniformModal';
 import { EditUniformModal } from './EditUniformModal';
+import { ReportType } from '../export/ExportReportModal';
+import { exportEquipmentToCSV, downloadCSV } from '../../utils/exportUtils';
 
-export const UniformManagement: React.FC = () => {
-  const { equipmentList, staffList, events, updateEquipment, deleteEquipment, currentRole } = useEvent();
+interface UniformManagementProps {
+  openExportModal?: (type?: ReportType, eventId?: string) => void;
+}
+
+export const UniformManagement: React.FC<UniformManagementProps> = ({ openExportModal }) => {
+  const { equipmentList, staffList, updateEquipment, deleteEquipment, currentRole } = useEvent();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSize, setFilterSize] = useState('ALL');
@@ -76,6 +83,12 @@ export const UniformManagement: React.FC = () => {
     updateEquipment(uniform.id, { totalQty: newTotal, availableQty: newAvailable });
   };
 
+  const handleQuickExportCSV = () => {
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const csv = exportEquipmentToCSV(uniforms);
+    downloadCSV(`Blessing_Event_Registre_Vestiaire_${timestamp}.csv`, csv);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -90,6 +103,15 @@ export const UniformManagement: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            id="export-uniforms-btn"
+            onClick={() => openExportModal ? openExportModal('UNIFORMS') : handleQuickExportCSV()}
+            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold text-xs uppercase tracking-wider rounded-md transition-colors flex items-center gap-1.5 shadow-xs shrink-0"
+            title="Exporter le vestiaire en CSV ou PDF"
+          >
+            <FileDown className="w-4 h-4 text-amber-600" />
+            <span>Exporter Vestiaire</span>
+          </button>
           {currentRole !== 'STAFF' && (
             <button
               onClick={() => setIsAddModalOpen(true)}

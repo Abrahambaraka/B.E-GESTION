@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEvent } from '../../context/EventContext';
-import { EventItem, EventType, EventStatus, Assignment, EventEquipment } from '../../types/event';
+import { EventItem, EventType } from '../../types/event';
 import { 
   Calendar, 
   MapPin, 
@@ -24,12 +24,13 @@ import {
 } from 'lucide-react';
 import { NavigationTab } from '../layout/Navbar';
 import { EditEventModal } from './EditEventModal';
+import { ReportType } from '../export/ExportReportModal';
 import { exportEventsToCSV, exportEventRoadmapToCSV, downloadCSV } from '../../utils/exportUtils';
 
 interface EventManagementProps {
   setActiveTab: (tab: NavigationTab) => void;
   openCreateModal: () => void;
-  openExportModal?: (type?: any, eventId?: string) => void;
+  openExportModal?: (type?: ReportType, eventId?: string) => void;
 }
 
 export const EventManagement: React.FC<EventManagementProps> = ({ 
@@ -64,6 +65,12 @@ export const EventManagement: React.FC<EventManagementProps> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<EventItem | null>(null);
 
+  // Quick staff assignment form state
+  const [selectedStaffToAdd, setSelectedStaffToAdd] = useState<string>('');
+  const [roleOnDayInput, setRoleOnDayInput] = useState<string>('Hôtesse Accueil VIP');
+  const [briefingInput, setBriefingInput] = useState<string>('');
+  const [showAssignForm, setShowAssignForm] = useState<boolean>(false);
+
   const selectedEvent = events.find(e => e.id === selectedEventId) || events[0];
 
   const handleExportAllEvents = () => {
@@ -83,14 +90,6 @@ export const EventManagement: React.FC<EventManagementProps> = ({
       downloadCSV(`Blessing_Event_Feuille_De_Route_${evt.title.replace(/\s+/g, '_')}.csv`, csv);
     }
   };
-
-  // Quick staff assignment form state
-  const [selectedStaffToAdd, setSelectedStaffToAdd] = useState<string>('');
-  const [roleOnDayInput, setRoleOnDayInput] = useState<string>('Hôtesse Accueil VIP');
-  const [briefingInput, setBriefingInput] = useState<string>('');
-  const [showAssignForm, setShowAssignForm] = useState<boolean>(false);
-
-  const selectedEvent = events.find(e => e.id === selectedEventId) || events[0];
 
   const handleOpenEdit = (evt: EventItem, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();

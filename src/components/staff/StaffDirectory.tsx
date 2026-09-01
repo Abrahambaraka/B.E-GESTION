@@ -24,10 +24,11 @@ import {
   Printer
 } from 'lucide-react';
 import { exportStaffToCSV, downloadCSV } from '../../utils/exportUtils';
+import { ReportType } from '../export/ExportReportModal';
 
 interface StaffDirectoryProps {
   openAddModal: () => void;
-  openExportModal?: (type?: any) => void;
+  openExportModal?: (type?: ReportType) => void;
 }
 
 export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, openExportModal }) => {

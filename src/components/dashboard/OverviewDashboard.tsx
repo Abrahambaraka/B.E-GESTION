@@ -15,20 +15,24 @@ import {
   MapPin, 
   Clock,
   ExternalLink,
-  Crown
+  Crown,
+  FileDown
 } from 'lucide-react';
 import { NavigationTab } from '../layout/Navbar';
+import { ReportType } from '../export/ExportReportModal';
 
 interface OverviewDashboardProps {
   setActiveTab: (tab: NavigationTab) => void;
   openNewEventModal: () => void;
   openNewStaffModal: () => void;
+  openExportModal?: (type?: ReportType, eventId?: string) => void;
 }
 
 export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ 
   setActiveTab, 
   openNewEventModal, 
-  openNewStaffModal 
+  openNewStaffModal,
+  openExportModal
 }) => {
   const { staffList, equipmentList, events, setSelectedEventId } = useEvent();
 
@@ -113,6 +117,16 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            {openExportModal && (
+              <button
+                id="dash-export-btn"
+                onClick={() => openExportModal('STAFF')}
+                className="px-3.5 py-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-100 font-semibold text-xs border border-slate-700 transition-colors flex items-center gap-1.5"
+                title="Exporter les données (CSV / PDF)"
+              >
+                <FileDown className="w-4 h-4 text-amber-400" /> Export
+              </button>
+            )}
             <button
               id="dash-create-event-btn"
               onClick={openNewEventModal}

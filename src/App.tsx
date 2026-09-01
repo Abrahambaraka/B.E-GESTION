@@ -14,7 +14,7 @@ import { EventManagement } from './components/events/EventManagement';
 import { CreateEventModal } from './components/events/CreateEventModal';
 import { UniformManagement } from './components/uniforms/UniformManagement';
 import { ExportReportModal, ReportType } from './components/export/ExportReportModal';
-import { Menu, Plus, Calendar, Users, FileDown } from 'lucide-react';
+import { Menu, Plus, Users, FileDown } from 'lucide-react';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');

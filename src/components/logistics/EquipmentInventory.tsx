@@ -20,9 +20,10 @@ import {
   FileDown
 } from 'lucide-react';
 import { exportEquipmentToCSV, downloadCSV } from '../../utils/exportUtils';
+import { ReportType } from '../export/ExportReportModal';
 
 interface EquipmentInventoryProps {
-  openExportModal?: (type?: any) => void;
+  openExportModal?: (type?: ReportType) => void;
 }
 
 export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExportModal }) => {
