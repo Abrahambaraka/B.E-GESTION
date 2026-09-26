@@ -84,6 +84,76 @@ export interface Assignment {
   user?: UserStaff;
 }
 
+export interface HonoredCouple {
+  partner1: string; // Ex: "Alexandre de Montmirail"
+  partner2: string; // Ex: "Inès Baraka"
+  title?: string; // Ex: "Les Mariés", "Les Époux Jubilaires", "Couple d'Honneur"
+  notes?: string; // Ex: "Arrivée prévue à 17h00 en Rolls-Royce d'époque"
+}
+
+export interface GuestItem {
+  id: string;
+  fullName: string;
+  category?: 'HONOR' | 'VIP' | 'FAMILY' | 'OFFICIAL' | 'GENERAL' | 'CHILD';
+  assignedTableName?: string; // Ex: "Table d'Honneur", "Table 1"
+  seatNumber?: number;
+  dietaryRequirements?: string; // Ex: "Sans gluten", "Halal", "Végétarien", "Standard"
+  plusOne?: string; // Nom de l'accompagnant si applicable
+  phone?: string;
+  status?: 'CONFIRMED' | 'PENDING' | 'DECLINED' | 'CHECKED_IN';
+  notes?: string;
+}
+
+export interface TableItem {
+  id: string;
+  name: string; // Ex: "Table d'Honneur - Versailles", "Table 1 - Royale"
+  capacity: number; // Nombre de places (ex: 10)
+  shape?: 'ROUND' | 'RECTANGULAR' | 'HONOR_U' | 'SQUARE' | 'HIGH_TOP';
+  assignedServerName?: string; // Ex: "Alexandre Mercier (Chef de rang)"
+  locationZone?: string; // Ex: "Devant la scène", "Côté jardin", "Terrasse"
+  notes?: string;
+}
+
+export interface EventHostess {
+  id: string;
+  staffId?: string; // ID if linked to an existing UserStaff in the database
+  fullName: string;
+  phone?: string;
+  assignedPost: string; // Ex: "Accueil VIP / Tapis rouge", "Remise des livrets & badges", "Vestiaire d'honneur", "Placement en salle"
+  uniformInfo?: string; // Ex: "Tailleur Signature Bleu Nuit T.36 + Foulard"
+  languages?: string[]; // Ex: ["FR", "EN"]
+  status?: 'CONFIRMED' | 'PRESENT' | 'LATE' | 'PENDING';
+  shiftTime?: string; // Ex: "15:00 - 23:00"
+  notes?: string;
+}
+
+export interface CatererServer {
+  id: string;
+  staffId?: string; // if linked to existing UserStaff
+  fullName: string;
+  phone?: string;
+  role: string; // Ex: "Maître d'Hôtel", "Chef de Rang", "Serveur Cocktail", "Sommelier", "Commis de Débarrassage"
+  assignedZone: string; // Ex: "Table d'Honneur & Table 1", "Buffet Chaud", "Bar à Champagne"
+  shiftTime?: string; // Ex: "16:00 - 02:00"
+  catererCompany?: string; // Ex: "Maison Lenôtre", "Baraka Catering"
+  status?: 'CONFIRMED' | 'PRESENT' | 'PENDING';
+  notes?: string;
+}
+
+export type BeverageCategory = 'CHAMPAGNE' | 'WINE_RED' | 'WINE_WHITE' | 'WINE_ROSE' | 'COCKTAIL' | 'SOFT_WATER' | 'SPIRITS' | 'BEER';
+
+export interface BeverageItem {
+  id: string;
+  name: string; // Ex: "Dom Pérignon Vintage 2013", "Château Talbot Saint-Julien", "San Pellegrino 1L", "Cocktail Signature Royal Berry"
+  category: BeverageCategory;
+  quantityOrdered: number; // Ex: 80
+  unit: string; // "Bouteilles (75cl)", "Magnums (1.5L)", "Cartons de 6", "Packs", "Litres", "Verres"
+  temperatureOrService?: string; // Ex: "Servir glacé à 6-8°C dans vasque argent", "Chambré à 16°C, décanter 30min"
+  allocatedBarOrZone?: string; // Ex: "Bar Principal & Cocktail", "Dîner Assis", "Buffet Accueil"
+  quantityConsumed?: number; // Pour le suivi de consommation
+  notes?: string;
+}
+
 export interface EventItem {
   id: string;
   title: string;
@@ -105,6 +175,17 @@ export interface EventItem {
   assignments: Assignment[];
   bookedItems: EventEquipment[];
   createdAt: string;
+
+  // Détails approfondis de gestion d'événement
+  couple?: HonoredCouple;
+  guests?: GuestItem[];
+  tables?: TableItem[];
+  hostesses?: EventHostess[];
+  catererServers?: CatererServer[];
+  catererCompanyName?: string;
+  catererHeadButler?: string;
+  catererNotes?: string;
+  beverages?: BeverageItem[];
 }
 
 export interface FilterState {

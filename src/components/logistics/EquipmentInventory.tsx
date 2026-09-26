@@ -20,14 +20,14 @@ import {
   FileDown
 } from 'lucide-react';
 import { exportEquipmentToCSV, downloadCSV } from '../../utils/exportUtils';
-import { ReportType } from '../export/ExportReportModal';
+import { UniformBatchModal } from '../uniforms/UniformBatchModal';
 
 interface EquipmentInventoryProps {
-  openExportModal?: (type?: ReportType) => void;
+  openExportModal?: (type?: any) => void;
 }
 
 export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExportModal }) => {
-  const { equipmentList, addEquipment, updateEquipment, deleteEquipment, currentRole } = useEvent();
+  const { equipmentList, addEquipment, updateEquipment, deleteEquipment } = useEvent();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDomain, setSelectedDomain] = useState<string>('ALL');
@@ -36,6 +36,7 @@ export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExpo
   const [selectedEquip, setSelectedEquip] = useState<Equipment | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isBatchUniformModalOpen, setIsBatchUniformModalOpen] = useState(false);
 
   const handleQuickExportCSV = () => {
     const timestamp = new Date().toISOString().slice(0, 10);
@@ -178,22 +179,21 @@ export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExpo
           <button
             id="export-equipment-btn"
             onClick={() => openExportModal ? openExportModal('EQUIPMENT') : handleQuickExportCSV()}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold text-xs uppercase tracking-wider rounded-md transition-colors flex items-center gap-1.5 shadow-xs shrink-0"
+            className="px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded text-xs font-medium transition-colors flex items-center gap-1 border border-slate-200"
             title="Exporter l'inventaire en CSV ou PDF"
           >
-            <FileDown className="w-4 h-4 text-amber-600" />
-            <span>Exporter Inventaire</span>
+            <FileDown className="w-3.5 h-3.5 text-slate-500" />
+            <span>Exporter</span>
           </button>
 
-          {currentRole !== 'STAFF' && (
-            <button
-              id="add-equip-top-btn"
-              onClick={() => setIsAddModalOpen(true)}
-              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs uppercase tracking-wider rounded-md transition-colors flex items-center gap-1.5 shadow-xs shrink-0"
-            >
-              <Plus className="w-4 h-4" /> Référencer un Équipement
-            </button>
-          )}
+          <button
+            id="add-equip-top-btn"
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Nouveau Matériel</span>
+          </button>
         </div>
       </div>
 
@@ -601,19 +601,17 @@ export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExpo
                           <Edit className="w-3 h-3 text-amber-600" />
                           <span>Modifier</span>
                         </button>
-                        {currentRole !== 'STAFF' && (
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Supprimer définitivement ${item.name} (${item.referenceCode}) de l'inventaire ?`)) {
-                                deleteEquipment(item.id);
-                              }
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded border border-slate-200 hover:border-rose-300 transition-colors"
-                            title="Supprimer ce matériel"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Supprimer définitivement ${item.name} (${item.referenceCode}) de l'inventaire ?`)) {
+                              deleteEquipment(item.id);
+                            }
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded border border-slate-200 hover:border-rose-300 transition-colors"
+                          title="Supprimer ce matériel"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -938,6 +936,11 @@ export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExpo
           </div>
         </div>
       )}
+      {/* Batch Uniform Registration Modal */}
+      <UniformBatchModal
+        isOpen={isBatchUniformModalOpen}
+        onClose={() => setIsBatchUniformModalOpen(false)}
+      />
     </div>
   );
 };

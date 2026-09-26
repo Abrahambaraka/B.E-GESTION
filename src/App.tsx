@@ -13,19 +13,21 @@ import { EquipmentInventory } from './components/logistics/EquipmentInventory';
 import { EventManagement } from './components/events/EventManagement';
 import { CreateEventModal } from './components/events/CreateEventModal';
 import { UniformManagement } from './components/uniforms/UniformManagement';
+import { UniformBatchModal } from './components/uniforms/UniformBatchModal';
 import { ExportReportModal, ReportType } from './components/export/ExportReportModal';
-import { Menu, Plus, Users, FileDown } from 'lucide-react';
+import { Menu, Plus, Calendar, Users, FileDown, Shirt } from 'lucide-react';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
   const [isNewStaffModalOpen, setIsNewStaffModalOpen] = useState(false);
   const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isUniformBatchModalOpen, setIsUniformBatchModalOpen] = useState(false);
   const [exportInitialType, setExportInitialType] = useState<ReportType>('STAFF');
   const [exportInitialEventId, setExportInitialEventId] = useState<string | undefined>(undefined);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { currentRole, events } = useEvent();
+  const { events } = useEvent();
   const activeEvent = events.find(e => e.status === 'IN_PROGRESS') || events[0];
 
   const handleOpenExport = (type: ReportType = 'STAFF', eventId?: string) => {
@@ -76,23 +78,21 @@ function AppContent() {
             </div>
           </div>
 
-          {/* Quick Header Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          {/* Streamlined Header Actions */}
+          <div className="flex items-center space-x-2">
             {activeEvent && (
-              <div 
+              <button
                 onClick={() => setActiveTab('events')}
-                className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-700 cursor-pointer hover:bg-slate-200 transition-colors"
+                className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 transition-colors"
+                title="Accéder à l'événement en cours"
               >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="font-semibold text-slate-800 truncate max-w-[130px]">{activeEvent.title.split('&')[0]}</span>
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">Jour J</span>
-              </div>
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span className="font-medium truncate max-w-[140px]">{activeEvent.title.split('&')[0]}</span>
+                <span className="text-[10px] text-slate-400">· Jour J</span>
+              </button>
             )}
 
-            {/* Export & Reporting button in Top Header */}
+            {/* Quiet Export action */}
             <button
               id="top-header-export-btn"
               onClick={() => {
@@ -105,34 +105,45 @@ function AppContent() {
                 };
                 handleOpenExport(mapType[activeTab]);
               }}
-              className="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-md text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
+              className="flex items-center space-x-1 px-2.5 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded text-xs font-medium transition-colors"
               title="Exporter les données (CSV / PDF)"
             >
-              <FileDown className="w-3.5 h-3.5 text-amber-600" />
-              <span className="hidden sm:inline">Export & Reporting</span>
-              <span className="sm:hidden">Export</span>
+              <FileDown className="w-3.5 h-3.5 text-slate-500" />
+              <span>Exporter</span>
             </button>
 
-            {currentRole !== 'STAFF' && (
-              <>
-                <button
-                  id="top-header-new-staff-btn"
-                  onClick={() => setIsNewStaffModalOpen(true)}
-                  className="hidden sm:flex items-center space-x-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-xs font-semibold uppercase tracking-wider transition-colors shadow-xs"
-                >
-                  <Users className="w-3.5 h-3.5" />
-                  <span>Ajouter Profil RH</span>
-                </button>
+            {/* Contextual primary action (single button) */}
+            {(activeTab === 'dashboard' || activeTab === 'events') && (
+              <button
+                id="top-header-new-event-btn"
+                onClick={() => setIsNewEventModalOpen(true)}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs font-semibold transition-colors shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Nouvel Événement</span>
+              </button>
+            )}
 
-                <button
-                  id="top-header-new-event-btn"
-                  onClick={() => setIsNewEventModalOpen(true)}
-                  className="flex items-center space-x-1.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Nouvel Événement</span>
-                </button>
-              </>
+            {activeTab === 'staff' && (
+              <button
+                id="top-header-new-staff-btn"
+                onClick={() => setIsNewStaffModalOpen(true)}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-semibold transition-colors shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Nouveau Profil</span>
+              </button>
+            )}
+
+            {activeTab === 'uniforms' && (
+              <button
+                id="top-header-uniform-batch-btn"
+                onClick={() => setIsUniformBatchModalOpen(true)}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-semibold transition-colors shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Enregistrer Tenues</span>
+              </button>
             )}
           </div>
         </header>
@@ -195,6 +206,11 @@ function AppContent() {
         onClose={() => setIsExportModalOpen(false)}
         initialType={exportInitialType}
         initialEventId={exportInitialEventId}
+      />
+
+      <UniformBatchModal
+        isOpen={isUniformBatchModalOpen}
+        onClose={() => setIsUniformBatchModalOpen(false)}
       />
     </div>
   );

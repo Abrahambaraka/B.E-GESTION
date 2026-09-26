@@ -299,6 +299,98 @@ export function exportEventRoadmapToCSV(
     ].join(';'));
   });
 
+  // Honored Couple / Hosts
+  if (event.couple) {
+    lines.push('');
+    lines.push(`"--- COUPLE À L'HONNEUR & PROTOCOLE D'ACCUEIL ---"`);
+    lines.push(`"Titre :";${escapeCSV(event.couple.title || 'Couple Célébré')}`);
+    lines.push(`"Conjoints :";${escapeCSV(`${event.couple.partner1} & ${event.couple.partner2}`)}`);
+    lines.push(`"Consignes d'arrivée :";${escapeCSV(event.couple.notes || 'Arrivée officielle')}`);
+  }
+
+  // Hostesses Call Sheet
+  if (event.hostesses && event.hostesses.length > 0) {
+    lines.push('');
+    lines.push(`"--- REGISTRE DES HÔTESSES DE RÉCEPTION & ACCUEIL ---"`);
+    lines.push(['Nom Hôtesse', 'Poste Assigné', 'Tenue / Uniforme', 'Horaires Vacation', 'Téléphone', 'Statut Présence'].map(escapeCSV).join(';'));
+    event.hostesses.forEach(h => {
+      lines.push([
+        escapeCSV(h.fullName),
+        escapeCSV(h.assignedPost),
+        escapeCSV(h.uniformInfo || 'Tailleur officiel'),
+        escapeCSV(h.shiftTime || 'Jour J'),
+        escapeCSV(h.phone || 'N/A'),
+        escapeCSV(h.status || 'CONFIRMÉE')
+      ].join(';'));
+    });
+  }
+
+  // Caterer & Waitstaff
+  if (event.catererServers && event.catererServers.length > 0) {
+    lines.push('');
+    lines.push(`"--- BRIGADE TRAITEUR & SERVICE EN SALLE (${event.catererCompanyName || 'Traiteur Officiel'}) ---"`);
+    lines.push(['Nom Serveur', 'Rôle / Rang', 'Zone & Tables Affectées', 'Horaires Service', 'Téléphone'].map(escapeCSV).join(';'));
+    event.catererServers.forEach(s => {
+      lines.push([
+        escapeCSV(s.fullName),
+        escapeCSV(s.role),
+        escapeCSV(s.assignedZone),
+        escapeCSV(s.shiftTime || 'Soirée'),
+        escapeCSV(s.phone || 'N/A')
+      ].join(';'));
+    });
+  }
+
+  // Tables Seating Plan
+  if (event.tables && event.tables.length > 0) {
+    lines.push('');
+    lines.push(`"--- PLAN DE TABLES & CAPACITÉS ASSISES ---"`);
+    lines.push(['Nom / N° Table', 'Capacité (Places)', 'Forme', 'Serveur Affecté', 'Zone Salle'].map(escapeCSV).join(';'));
+    event.tables.forEach(t => {
+      lines.push([
+        escapeCSV(t.name),
+        escapeCSV(t.capacity),
+        escapeCSV(t.shape || 'Ronde'),
+        escapeCSV(t.assignedServerName || 'Non assigné'),
+        escapeCSV(t.locationZone || 'Salle principale')
+      ].join(';'));
+    });
+  }
+
+  // Beverages Inventory & Orders
+  if (event.beverages && event.beverages.length > 0) {
+    lines.push('');
+    lines.push(`"--- REGISTRE CAVE, BOISSONS & BAR DE RÉCEPTION ---"`);
+    lines.push(['Désignation Boisson', 'Catégorie', 'Quantité Commandée', 'Unité', 'Consommation Constatée', 'Consignes Température / Service'].map(escapeCSV).join(';'));
+    event.beverages.forEach(b => {
+      lines.push([
+        escapeCSV(b.name),
+        escapeCSV(b.category),
+        escapeCSV(b.quantityOrdered),
+        escapeCSV(b.unit),
+        escapeCSV(b.quantityConsumed || 0),
+        escapeCSV(b.temperatureOrService || 'Normal')
+      ].join(';'));
+    });
+  }
+
+  // Guest List
+  if (event.guests && event.guests.length > 0) {
+    lines.push('');
+    lines.push(`"--- LISTE DES INVITÉS & PLACEMENT NOMINATIF ---"`);
+    lines.push(['Nom Invité', 'Catégorie', 'Table Assignée', 'Siège', 'Régime Alimentaire', 'Statut Émargement'].map(escapeCSV).join(';'));
+    event.guests.forEach(g => {
+      lines.push([
+        escapeCSV(g.fullName),
+        escapeCSV(g.category || 'VIP'),
+        escapeCSV(g.assignedTableName || 'Non assigné'),
+        escapeCSV(g.seatNumber || '-'),
+        escapeCSV(g.dietaryRequirements || 'Standard'),
+        escapeCSV(g.status === 'CHECKED_IN' ? 'PRÉSENT SUR SITE' : 'ATTENDU')
+      ].join(';'));
+    });
+  }
+
   return lines.join('\r\n');
 }
 

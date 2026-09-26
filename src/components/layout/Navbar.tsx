@@ -13,7 +13,6 @@ import {
   X,
   FileDown
 } from 'lucide-react';
-import { Role } from '../../types/event';
 
 export type NavigationTab = 
   | 'dashboard' 
@@ -37,7 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setMobileMenuOpen,
   onOpenExport
 }) => {
-  const { currentRole, setCurrentRole, resetDemoData } = useEvent();
+  const { resetDemoData } = useEvent();
 
   interface NavItem {
     id: NavigationTab;
@@ -162,21 +161,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </nav>
 
-        {/* Role & Profile Section */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/50 space-y-3">
-          {/* User Profile Card */}
+        {/* Administrator Profile Section */}
+        <div className="p-4 border-t border-slate-800 bg-slate-950/60">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-amber-400">
-                {currentRole === 'ADMIN' ? 'AD' : currentRole === 'PROJECT_MANAGER' ? 'CP' : 'ST'}
+              <div className="w-9 h-9 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xs font-bold text-amber-400 shadow-xs">
+                AD
               </div>
               <div className="overflow-hidden">
                 <p className="text-xs font-semibold text-white truncate">
-                  {currentRole === 'ADMIN' ? 'Direction d’Agence' : currentRole === 'PROJECT_MANAGER' ? 'Chef de Projet Régie' : 'Hôte / Serveur Extra'}
+                  Direction Générale
                 </p>
-                <p className="text-[11px] text-slate-400 truncate">
-                  {currentRole === 'ADMIN' ? 'Admin • Pleins Pouvoirs' : currentRole === 'PROJECT_MANAGER' ? 'Régisseur Général' : 'Profil Opérationnel'}
-                </p>
+                <div className="flex items-center space-x-1 text-[11px] text-amber-400 font-medium">
+                  <ShieldCheck className="w-3 h-3 text-amber-400 shrink-0" />
+                  <span className="truncate">Admin • Pleins Pouvoirs</span>
+                </div>
               </div>
             </div>
 
@@ -192,24 +191,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
-          </div>
-
-          {/* Quick Role Toggle Bar */}
-          <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-md border border-slate-800 text-[10px]">
-            {(['ADMIN', 'PROJECT_MANAGER', 'STAFF'] as Role[]).map((r) => (
-              <button
-                key={r}
-                id={`role-btn-${r.toLowerCase()}`}
-                onClick={() => setCurrentRole(r)}
-                className={`py-1 px-1 rounded font-medium transition-all text-center truncate ${
-                  currentRole === r
-                    ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {r === 'ADMIN' ? 'Admin' : r === 'PROJECT_MANAGER' ? 'Régie' : 'Staff'}
-              </button>
-            ))}
           </div>
         </div>
       </aside>

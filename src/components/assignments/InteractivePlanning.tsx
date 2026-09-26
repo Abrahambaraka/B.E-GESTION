@@ -24,8 +24,7 @@ export const InteractivePlanning: React.FC = () => {
     staffList, 
     equipmentList, 
     assignStaffToEvent, 
-    removeStaffAssignment, 
-    currentRole 
+    removeStaffAssignment 
   } = useEvent();
 
   const [selectedEventId, setSelectedEventId] = useState<string>(events[0]?.id || '');
@@ -221,15 +220,13 @@ export const InteractivePlanning: React.FC = () => {
                         </div>
 
                         <div className="flex flex-col items-end gap-2 shrink-0">
-                          {currentRole !== 'STAFF' && (
-                            <button
-                              onClick={() => removeStaffAssignment(currentEvent.id, asg.id)}
-                              className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded"
-                              title="Retirer cette affectation"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => removeStaffAssignment(currentEvent.id, asg.id)}
+                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded"
+                            title="Retirer cette affectation"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     );
@@ -246,12 +243,7 @@ export const InteractivePlanning: React.FC = () => {
                 <UserCheck className="w-4 h-4 text-amber-700" /> Assigner un Collaborateur à la Réception
               </h4>
 
-              {currentRole === 'STAFF' ? (
-                <div className="p-4 bg-stone-50 rounded-lg text-xs text-stone-500 text-center">
-                  Seuls les coordinateurs et directeurs peuvent modifier les affectations.
-                </div>
-              ) : (
-                <form onSubmit={handleAssign} className="space-y-3.5 text-xs">
+              <form onSubmit={handleAssign} className="space-y-3.5 text-xs">
                   {/* Select Staff */}
                   <div>
                     <label className="block font-medium text-stone-700 mb-1">
@@ -346,7 +338,6 @@ export const InteractivePlanning: React.FC = () => {
                     <Check className="w-4 h-4" /> Valider l'Affectation au Poste
                   </button>
                 </form>
-              )}
             </div>
           </div>
         </div>

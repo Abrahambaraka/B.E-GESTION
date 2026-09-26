@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export const LiveCheckIn: React.FC = () => {
-  const { events, selectedEventId, setSelectedEventId, staffList, updateCheckIn, currentRole } = useEvent();
+  const { events, selectedEventId, setSelectedEventId, staffList, updateCheckIn } = useEvent();
 
   const [signatureModalAsg, setSignatureModalAsg] = useState<Assignment | null>(null);
   const [signatureInput, setSignatureInput] = useState('');

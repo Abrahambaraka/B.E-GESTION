@@ -38,7 +38,7 @@ export const ExportReportModal: React.FC<ExportReportModalProps> = ({
   initialType = 'STAFF',
   initialEventId,
 }) => {
-  const { staffList, equipmentList, events, currentRole } = useEvent();
+  const { staffList, equipmentList, events } = useEvent();
 
   const [reportType, setReportType] = useState<ReportType>(initialType);
   const [selectedEventId, setSelectedEventId] = useState<string>(

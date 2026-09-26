@@ -734,6 +734,53 @@ export const INITIAL_EVENTS: EventItem[] = [
       }
     ],
     createdAt: '2026-08-10T10:00:00Z',
+    couple: {
+      partner1: "S.E. Monsieur l'Ambassadeur d'Allemagne",
+      partner2: "Madame l'Ambassadrice",
+      title: "Dignitaires d'Honneur Sommet 2026",
+      notes: "Arrivée sous escorte officielle à 18h15. Accueil au perron par la direction."
+    },
+    tables: [
+      { id: 'tbl-101-1', name: "Table d'Honneur - Gabriel", capacity: 12, shape: 'HONOR_U', assignedServerName: "Alexandre Mercier (Maître d'Hôtel)", locationZone: "Scène centrale & Estaminet d'apparat", notes: "Service protocolaire simultané à la cloche" },
+      { id: 'tbl-101-2', name: "Table 1 - Élysée", capacity: 10, shape: 'ROUND', assignedServerName: "Julien Roussel (Chef de Rang)", locationZone: "Aile droite côté jardins", notes: "Délégations plénipotentiaires" },
+      { id: 'tbl-101-3', name: "Table 2 - Concorde", capacity: 10, shape: 'ROUND', assignedServerName: "Julien Roussel (Chef de Rang)", locationZone: "Aile gauche côté galerie", notes: "Représentants des institutions UE" },
+      { id: 'tbl-101-4', name: "Table 3 - Quai d'Orsay", capacity: 10, shape: 'ROUND', assignedServerName: "Marc Vasseur (Chef de Rang)", locationZone: "Centre nef", notes: "Corps consulaire" },
+      { id: 'tbl-101-5', name: "Table 4 - Luxembourg", capacity: 10, shape: 'ROUND', assignedServerName: "Marc Vasseur (Chef de Rang)", locationZone: "Centre nef - Rang 2", notes: "Délégation parlementaire" },
+      { id: 'tbl-101-6', name: "Table 5 - Montaigne", capacity: 8, shape: 'ROUND', assignedServerName: "Pauline Denis (Serveuse)", locationZone: "Salon d'angle VIP", notes: "Invités d'honneur culturels" }
+    ],
+    guests: [
+      { id: 'gst-101-1', fullName: "S.E. Ambassadeur Karl von Weber", category: 'HONOR', assignedTableName: "Table d'Honneur - Gabriel", seatNumber: 1, dietaryRequirements: "Standard", status: 'CHECKED_IN', notes: "Chef de délégation" },
+      { id: 'gst-101-2', fullName: "Mme Astrid von Weber", category: 'HONOR', assignedTableName: "Table d'Honneur - Gabriel", seatNumber: 2, dietaryRequirements: "Sans poisson / crustacés", status: 'CHECKED_IN', notes: "Épouse de l'Ambassadeur" },
+      { id: 'gst-101-3', fullName: "Ministre Jean-Marc Delorme", category: 'OFFICIAL', assignedTableName: "Table d'Honneur - Gabriel", seatNumber: 3, dietaryRequirements: "Standard", status: 'CHECKED_IN', notes: "Secrétaire d'État aux Affaires Européennes" },
+      { id: 'gst-101-4', fullName: "Lady Catherine Montgomery", category: 'VIP', assignedTableName: "Table 1 - Élysée", seatNumber: 1, dietaryRequirements: "Végétarien strict", status: 'CHECKED_IN', notes: "Envoyée spéciale Commonwealth" },
+      { id: 'gst-101-5', fullName: "Consul Général Matteo Rossi", category: 'OFFICIAL', assignedTableName: "Table 2 - Concorde", seatNumber: 1, dietaryRequirements: "Standard", status: 'CONFIRMED', notes: "Consulat général d'Italie" },
+      { id: 'gst-101-6', fullName: "Dr. Amina Al-Mansour", category: 'VIP', assignedTableName: "Table 1 - Élysée", seatNumber: 2, dietaryRequirements: "Halal certifié", status: 'CHECKED_IN', notes: "Attachée culturelle" },
+      { id: 'gst-101-7', fullName: "Baron Henri de la Tour", category: 'VIP', assignedTableName: "Table d'Honneur - Gabriel", seatNumber: 4, dietaryRequirements: "Sans sel ajouté", status: 'CONFIRMED', notes: "Haut mécène de l'événement" }
+    ],
+    hostesses: [
+      { id: 'hst-101-1', staffId: 'usr-1', fullName: 'Charlotte Dubois', phone: '+33 6 12 34 56 78', assignedPost: "Perron d'Honneur & Accueil des Ambassadeurs", uniformInfo: "Tailleur Marine Signature T.36 & Foulard Soie", languages: ['FR', 'EN', 'ES'], status: 'PRESENT', shiftTime: '17:30 - 01:30', notes: "Briefing protocolaire de préséance validé" },
+      { id: 'hst-101-2', staffId: 'usr-3', fullName: 'Inaya Benali', phone: '+33 6 45 67 89 01', assignedPost: "Émargement Sécurisé & Remise des Badges Numérotés", uniformInfo: "Tailleur Marine Signature T.38 & Foulard Soie", languages: ['FR', 'EN', 'AR'], status: 'PRESENT', shiftTime: '17:30 - 01:30', notes: "Prise en charge des délégations arabophones" },
+      { id: 'hst-101-3', staffId: 'usr-7', fullName: 'Léa Moreau', phone: '+33 6 55 44 33 22', assignedPost: "Guidage Salons Gabriel & Placement aux Tables", uniformInfo: "Tailleur Marine Signature T.36 & Foulard Soie", languages: ['FR', 'EN', 'ZH'], status: 'PRESENT', shiftTime: '17:30 - 01:30', notes: "Support interprétation pour délégation asiatique" }
+    ],
+    catererCompanyName: 'Maison Potel & Chabot Traiteur de France',
+    catererHeadButler: 'Alexandre Mercier (Maître d’Hôtel Directeur)',
+    catererNotes: 'Service synchronisé à 20h30. Accord mets-vins millésimés. Chaîne du froid rigoureusement contrôlée.',
+    catererServers: [
+      { id: 'srv-101-1', staffId: 'usr-2', fullName: 'Alexandre Mercier', phone: '+33 6 98 76 54 32', role: "Maître d'Hôtel Principal", assignedZone: "Table d'Honneur & Coordination Salle", shiftTime: '17:00 - 02:00', catererCompany: 'Potel & Chabot', status: 'PRESENT', notes: "Direction du ballet des serveurs" },
+      { id: 'srv-101-2', staffId: 'usr-4', fullName: 'Julien Roussel', phone: '+33 6 23 45 67 89', role: "Chef de Rang Prestige", assignedZone: "Tables 1 (Élysée) & 2 (Concorde)", shiftTime: '17:30 - 01:30', catererCompany: 'Potel & Chabot', status: 'PRESENT', notes: "Service des plats chauds et dressage" },
+      { id: 'srv-101-3', staffId: 'usr-6', fullName: 'Maximilian Schmidt', phone: '+33 6 33 22 11 00', role: "Sommelier en Chef", assignedZone: "Caveau & Service Vins de Prestige", shiftTime: '17:00 - 01:30', catererCompany: 'Potel & Chabot', status: 'PRESENT', notes: "Décantation des Grands Crus 1h avant service" },
+      { id: 'srv-101-4', fullName: 'Marc Vasseur', phone: '+33 6 77 88 99 00', role: "Chef de Rang", assignedZone: "Tables 3 (Quai d'Orsay) & 4 (Luxembourg)", shiftTime: '17:30 - 01:30', catererCompany: 'Potel & Chabot', status: 'PRESENT', notes: "Service des desserts et digestifs" },
+      { id: 'srv-101-5', fullName: 'Pauline Denis', phone: '+33 6 66 55 44 33', role: "Commis de Salle & Débarrassage", assignedZone: "Office & Tables 4-5", shiftTime: '18:00 - 02:00', catererCompany: 'Potel & Chabot', status: 'PRESENT', notes: "Gestion du réapprovisionnement en verrerie" }
+    ],
+    beverages: [
+      { id: 'bev-101-1', name: 'Dom Pérignon Vintage 2013 Brut', category: 'CHAMPAGNE', quantityOrdered: 60, unit: 'Bouteilles (75cl)', temperatureOrService: 'Servir à 8°C dans flûtes cristal rafraîchies', allocatedBarOrZone: "Cocktail d'accueil & Toast d'Honneur", quantityConsumed: 48, notes: 'Bouteilles scellées avec étiquette prestige' },
+      { id: 'bev-101-2', name: 'Château Margaux Premier Grand Cru Classé 2015', category: 'WINE_RED', quantityOrdered: 45, unit: 'Bouteilles (75cl)', temperatureOrService: 'Chambré à 17°C, carafer 45 minutes avant service', allocatedBarOrZone: "Dîner Assis - Viande Rouge & Fromages", quantityConsumed: 32, notes: 'À servir avec gants blancs' },
+      { id: 'bev-101-3', name: 'Meursault Premier Cru Domaine des Comtes Lafon 2020', category: 'WINE_WHITE', quantityOrdered: 40, unit: 'Bouteilles (75cl)', temperatureOrService: 'Servir frais entre 10°C et 12°C', allocatedBarOrZone: "Dîner Assis - Entrée Homard & Poissons", quantityConsumed: 28, notes: 'Idéal accord mets raffinés' },
+      { id: 'bev-101-4', name: "Cocktail Signature 'L'Élysée Royal' (Framboise, Champagne, Fleur de Sureau)", category: 'COCKTAIL', quantityOrdered: 180, unit: 'Verres prévus', temperatureOrService: 'Préparé minute sur glace pilée au bar cocktail', allocatedBarOrZone: "Bar Principal & Péristyle", quantityConsumed: 145, notes: 'Garni d’une framboise fraîche dorée à la feuille d’or' },
+      { id: 'bev-101-5', name: 'San Pellegrino 1L Eau Gazeuse', category: 'SOFT_WATER', quantityOrdered: 120, unit: 'Bouteilles verre (1L)', temperatureOrService: 'Fraîche avec rondelle de citron jaune non traité', allocatedBarOrZone: "Tables & Bar de courtoisie", quantityConsumed: 85, notes: 'Bouteilles en verre consigné d’apparat' },
+      { id: 'bev-101-6', name: 'Evian Grand cru 1L Eau Minérale Naturelle', category: 'SOFT_WATER', quantityOrdered: 120, unit: 'Bouteilles verre (1L)', temperatureOrService: 'Température ambiante ou fraîche selon convenance', allocatedBarOrZone: "Tables de banquet", quantityConsumed: 90, notes: 'Présentées avec cache-collerette' },
+      { id: 'bev-101-7', name: 'Cognac Hennessy XO & Armagnac Hors d’Âge', category: 'SPIRITS', quantityOrdered: 12, unit: 'Bouteilles (70cl)', temperatureOrService: 'Servir à température ambiante dans verres tulipes tiédis', allocatedBarOrZone: "Chariot de digestifs & Salon Cigare", quantityConsumed: 6, notes: 'Service en fin de soirée' }
+    ]
   },
   {
     id: 'evt-102',
@@ -753,6 +800,52 @@ export const INITIAL_EVENTS: EventItem[] = [
     budget: 72000,
     status: 'PLANNED',
     description: 'Mariage haut de gamme avec cérémonie laïque en plein air, cocktail dans les jardins à la française et dîner d’apparat.',
+    couple: {
+      partner1: 'Alexandre de Montmirail',
+      partner2: 'Inès Baraka',
+      title: 'Les Mariés d’Honneur',
+      notes: 'Arrivée en calèche royale d’époque dans la cour d’honneur à 16h30. Entrée des mariés en musique symphonique.'
+    },
+    tables: [
+      { id: 'tbl-102-1', name: "Table d'Honneur - Les Cyprès Royaux", capacity: 14, shape: 'HONOR_U', assignedServerName: "Alexandre Mercier (Maître d'Hôtel)", locationZone: "Estrade panoramique Galerie des Glaces", notes: "Table des mariés, parents et témoins officiels" },
+      { id: 'tbl-102-2', name: "Table 1 - Diamant & Or", capacity: 10, shape: 'ROUND', assignedServerName: "Julien Roussel (Chef de Rang)", locationZone: "Premier rang face aux mariés", notes: "Famille proche marié" },
+      { id: 'tbl-102-3', name: "Table 2 - Émeraude", capacity: 10, shape: 'ROUND', assignedServerName: "Julien Roussel (Chef de Rang)", locationZone: "Premier rang face aux mariés (côté droit)", notes: "Famille proche mariée" },
+      { id: 'tbl-102-4', name: "Table 3 - Saphir Impérial", capacity: 10, shape: 'ROUND', assignedServerName: "Thomas Leroy (Serveur)", locationZone: "Deuxième rang centre", notes: "Témoins et amis d'enfance" },
+      { id: 'tbl-102-5', name: "Table 4 - Rubis Étoilé", capacity: 10, shape: 'ROUND', assignedServerName: "Thomas Leroy (Serveur)", locationZone: "Deuxième rang aile gauche", notes: "Collègues & Associés Direction" },
+      { id: 'tbl-102-6', name: "Table 5 - Perle de Nacre", capacity: 10, shape: 'ROUND', assignedServerName: "Thomas Leroy (Serveur)", locationZone: "Deuxième rang aile droite", notes: "Délégation internationale" },
+      { id: 'tbl-102-7', name: "Table 6 - Les Petits Princes (Enfants)", capacity: 12, shape: 'RECTANGULAR', assignedServerName: "Chloé Faure (Animatrice & Service)", locationZone: "Salon contigu sécurisé", notes: "Menu enfant adapté, jus et bonbons de luxe" }
+    ],
+    guests: [
+      { id: 'gst-102-1', fullName: "Alexandre de Montmirail", category: 'HONOR', assignedTableName: "Table d'Honneur - Les Cyprès Royaux", seatNumber: 1, dietaryRequirements: "Standard", status: 'CONFIRMED', notes: "Le Marié" },
+      { id: 'gst-102-2', fullName: "Inès Baraka", category: 'HONOR', assignedTableName: "Table d'Honneur - Les Cyprès Royaux", seatNumber: 2, dietaryRequirements: "Halal & Sans gluten", status: 'CONFIRMED', notes: "La Mariée" },
+      { id: 'gst-102-3', fullName: "Comte Godefroy de Montmirail", category: 'FAMILY', assignedTableName: "Table d'Honneur - Les Cyprès Royaux", seatNumber: 3, dietaryRequirements: "Standard", status: 'CONFIRMED', notes: "Père du marié" },
+      { id: 'gst-102-4', fullName: "Mme Leila Baraka", category: 'FAMILY', assignedTableName: "Table d'Honneur - Les Cyprès Royaux", seatNumber: 4, dietaryRequirements: "Halal", status: 'CONFIRMED', notes: "Mère de la mariée" },
+      { id: 'gst-102-5', fullName: "Guillaume de Valmont", category: 'VIP', assignedTableName: "Table d'Honneur - Les Cyprès Royaux", seatNumber: 5, dietaryRequirements: "Standard", status: 'CONFIRMED', notes: "Témoin du marié" },
+      { id: 'gst-102-6', fullName: "Camille d'Argenson", category: 'VIP', assignedTableName: "Table d'Honneur - Les Cyprès Royaux", seatNumber: 6, dietaryRequirements: "Végétarien", status: 'CONFIRMED', notes: "Témoin de la mariée" },
+      { id: 'gst-102-7', fullName: "M. Abraham Baraka", category: 'VIP', assignedTableName: "Table 2 - Émeraude", seatNumber: 1, dietaryRequirements: "Halal", status: 'CONFIRMED', notes: "Invité d'Honneur famille" }
+    ],
+    hostesses: [
+      { id: 'hst-102-1', staffId: 'usr-7', fullName: 'Léa Moreau', phone: '+33 6 55 44 33 22', assignedPost: "Accueil Cérémonie Laïque & Remise des Livrets d'Apparat", uniformInfo: "Robe de Cérémonie Ivoire & Ceinture Dorée", languages: ['FR', 'EN'], status: 'CONFIRMED', shiftTime: '14:30 - 23:00', notes: "Accueil des invités au portail du château" },
+      { id: 'hst-102-2', staffId: 'usr-1', fullName: 'Charlotte Dubois', phone: '+33 6 12 34 56 78', assignedPost: "Escorte des Mariés & Placement VIP Familles d'Honneur", uniformInfo: "Robe de Cérémonie Ivoire & Ceinture Dorée", languages: ['FR', 'EN', 'ES'], status: 'CONFIRMED', shiftTime: '15:00 - 23:30', notes: "Liaison directe avec le coordinateur" },
+      { id: 'hst-102-3', fullName: 'Camille Renaud', phone: '+33 6 11 22 33 44', assignedPost: "Vestiaire des Dames & Bar à Chapeaux", uniformInfo: "Robe Ivoire Signature", languages: ['FR', 'EN'], status: 'CONFIRMED', shiftTime: '15:30 - 02:00', notes: "Prise en charge des étoles et manteaux de soirée" }
+    ],
+    catererCompanyName: 'Maison Lenôtre Haute Gastronomie',
+    catererHeadButler: 'Maître Édouard Delacroix',
+    catererNotes: 'Cocktail de 18h30 à 20h30 dans l’Orangerie. Dîner servi à 21h00. Pièce montée illuminée aux fontaines scintillantes à minuit.',
+    catererServers: [
+      { id: 'srv-102-1', staffId: 'usr-6', fullName: 'Maximilian Schmidt', phone: '+33 6 33 22 11 00', role: "Maître d'Hôtel & Sommelier Principal", assignedZone: "Table des Mariés & Chariot à Champagne", shiftTime: '16:00 - 04:00', catererCompany: 'Maison Lenôtre', status: 'CONFIRMED', notes: "Ouverture des magnums et découpe du gâteau" },
+      { id: 'srv-102-2', fullName: 'Thomas Leroy', phone: '+33 6 44 33 22 11', role: "Chef de Rang Prestige", assignedZone: "Tables 1 à 3 (Diamant & Émeraude)", shiftTime: '16:30 - 03:30', catererCompany: 'Maison Lenôtre', status: 'CONFIRMED', notes: "Service personnalisé pour la famille des mariés" },
+      { id: 'srv-102-3', fullName: 'Sarah Boukhari', phone: '+33 6 88 77 66 55', role: "Barmaid & Mixologue Cocktail", assignedZone: "Bar Miroir & Pavillon Cocktail", shiftTime: '17:00 - 04:00', catererCompany: 'Maison Lenôtre', status: 'CONFIRMED', notes: "Création des mocktails sans alcool et cocktails signature" },
+      { id: 'srv-102-4', fullName: 'Chloé Faure', phone: '+33 6 77 66 55 44', role: "Service Dédié Enfants & Famille", assignedZone: "Table 6 (Les Petits Princes)", shiftTime: '18:00 - 01:00', catererCompany: 'Maison Lenôtre', status: 'CONFIRMED', notes: "Distribution des menus enfants et animations" }
+    ],
+    beverages: [
+      { id: 'bev-102-1', name: 'Champagne Ruinart Blanc de Blancs', category: 'CHAMPAGNE', quantityOrdered: 120, unit: 'Bouteilles (75cl)', temperatureOrService: 'Servir entre 6°C et 8°C dans vasques argent avec glace', allocatedBarOrZone: "Cocktail d'Arrivée & Fontaine de Champagne", quantityConsumed: 0, notes: 'À sabrer pour l’entrée des mariés' },
+      { id: 'bev-102-2', name: 'Moët & Chandon Brut Impérial (Magnums 1.5L)', category: 'CHAMPAGNE', quantityOrdered: 30, unit: 'Magnums (1.5L)', temperatureOrService: 'Très frais, vasques dorées illuminées', allocatedBarOrZone: "Dessert & Découpe de la Pièce Montée", quantityConsumed: 0, notes: 'Format festif pour minuit' },
+      { id: 'bev-102-3', name: 'Saint-Émilion Grand Cru Château Cheval Blanc 2016', category: 'WINE_RED', quantityOrdered: 80, unit: 'Bouteilles (75cl)', temperatureOrService: 'Ouvrir 2 heures avant, servir chambré à 16-17°C', allocatedBarOrZone: "Dîner Assis des Convives", quantityConsumed: 0, notes: 'Grand vin pour le plat principal' },
+      { id: 'bev-102-4', name: 'Cocktail Signature "Passion d’Amour" (Fruits exotiques, Champagne & Fleur d’Oranger)', category: 'COCKTAIL', quantityOrdered: 250, unit: 'Verres prévus', temperatureOrService: 'Au shaker avec fleurs comestibles', allocatedBarOrZone: "Bar Central des Jardins", quantityConsumed: 0, notes: 'Option avec ou sans alcool pour tous' },
+      { id: 'bev-102-5', name: 'Mocktail Fraîcheur Mojito Framboise & Basilic (Sans Alcool)', category: 'SOFT_WATER', quantityOrdered: 150, unit: 'Verres prévus', temperatureOrService: 'Pilonné minute, eau gazeuse fraîche', allocatedBarOrZone: "Bar Sans Alcool & Enfant", quantityConsumed: 0, notes: 'Alternative saine et très élégante' },
+      { id: 'bev-102-6', name: 'Eaux Minérales San Pellegrino & Evian', category: 'SOFT_WATER', quantityOrdered: 300, unit: 'Bouteilles verre (1L)', temperatureOrService: 'Régulièrement réapprovisionnées sur toutes les tables', allocatedBarOrZone: "Toutes les tables & Bar", quantityConsumed: 0, notes: '150 gazeuses + 150 plates' }
+    ],
     assignments: [
       {
         id: 'asg-102-1',

@@ -20,9 +20,10 @@ interface EventContextType {
   addEquipment: (equipment: Omit<Equipment, 'id'>) => void;
   updateEquipment: (id: string, updates: Partial<Equipment>) => void;
   deleteEquipment: (id: string) => void;
+  batchAddOrUpdateUniforms: (items: Array<Omit<Equipment, 'id'> & { id?: string }>) => { createdCount: number; updatedCount: number; totalPieces: number };
   
   // Event operations
-  addEvent: (event: Omit<EventItem, 'id' | 'createdAt' | 'assignments' | 'bookedItems'>) => void;
+  addEvent: (event: Omit<EventItem, 'id' | 'createdAt'> & { assignments?: Assignment[]; bookedItems?: EventEquipment[] }) => void;
   updateEvent: (id: string, updates: Partial<EventItem>) => void;
   deleteEvent: (id: string) => void;
   
@@ -71,22 +72,39 @@ export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [events, setEvents] = useState<EventItem[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.EVENTS);
-      return saved ? JSON.parse(saved) : INITIAL_EVENTS;
+      if (!saved) return INITIAL_EVENTS;
+      const parsed: EventItem[] = JSON.parse(saved);
+      return parsed.map((evt) => {
+        const initialMatch = INITIAL_EVENTS.find((init) => init.id === evt.id);
+        return {
+          ...evt,
+          tables: evt.tables && evt.tables.length > 0 ? evt.tables : (initialMatch?.tables || []),
+          guests: evt.guests && evt.guests.length > 0 ? evt.guests : (initialMatch?.guests || []),
+          hostesses: evt.hostesses && evt.hostesses.length > 0 ? evt.hostesses : (initialMatch?.hostesses || []),
+          catererServers: evt.catererServers && evt.catererServers.length > 0 ? evt.catererServers : (initialMatch?.catererServers || []),
+          beverages: evt.beverages && evt.beverages.length > 0 ? evt.beverages : (initialMatch?.beverages || []),
+          couple: evt.couple || initialMatch?.couple,
+          catererCompanyName: evt.catererCompanyName || initialMatch?.catererCompanyName || '',
+          catererHeadButler: evt.catererHeadButler || initialMatch?.catererHeadButler || '',
+          catererNotes: evt.catererNotes || initialMatch?.catererNotes || '',
+        };
+      });
     } catch {
       return INITIAL_EVENTS;
     }
   });
 
-  const [currentRole, setCurrentRole] = useState<Role>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.ROLE);
-      return (saved as Role) || 'ADMIN';
-    } catch {
-      return 'ADMIN';
-    }
-  });
+  const [currentRole, setCurrentRole] = useState<Role>('ADMIN');
 
   const [selectedEventId, setSelectedEventId] = useState<string | null>('evt-101');
+
+  useEffect(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEYS.ROLE);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -112,13 +130,6 @@ export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [events]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ROLE, currentRole);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [currentRole]);
 
   // Recalculate available quantities on equipment when bookings change
   const recalculateAvailableStock = (currentEquip: Equipment[], currentEvents: EventItem[]): Equipment[] => {
@@ -186,12 +197,70 @@ export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     );
   };
 
-  const addEvent = (eventData: Omit<EventItem, 'id' | 'createdAt' | 'assignments' | 'bookedItems'>) => {
+  const batchAddOrUpdateUniforms = (items: Array<Omit<Equipment, 'id'> & { id?: string }>) => {
+    let createdCount = 0;
+    let updatedCount = 0;
+    let totalPieces = 0;
+
+    setEquipmentList((prev) => {
+      const next = [...prev];
+      items.forEach((item, index) => {
+        totalPieces += item.totalQty;
+        // Check if an existing uniform matches the referenceCode OR (name + sizeOrDimensions)
+        const existingIdx = next.findIndex(
+          (e) =>
+            e.category === 'UNIFORM' &&
+            ((item.referenceCode && e.referenceCode && e.referenceCode.toLowerCase() === item.referenceCode.toLowerCase()) ||
+             (e.name.toLowerCase() === item.name.toLowerCase() && e.sizeOrDimensions === item.sizeOrDimensions))
+        );
+
+        if (existingIdx >= 0) {
+          // Update existing item quantities and details
+          const existing = next[existingIdx];
+          const newTotal = existing.totalQty + item.totalQty;
+          const newAvailable = existing.availableQty + item.availableQty;
+          next[existingIdx] = {
+            ...existing,
+            totalQty: newTotal,
+            availableQty: newAvailable,
+            condition: item.condition || existing.condition,
+            locationWarehouse: item.locationWarehouse || existing.locationWarehouse,
+            colorOrFinish: item.colorOrFinish || existing.colorOrFinish,
+            unitValueEuro: item.unitValueEuro || existing.unitValueEuro,
+            notes: item.notes ? `${existing.notes ? existing.notes + ' | ' : ''}${item.notes}` : existing.notes,
+          };
+          updatedCount++;
+        } else {
+          // Create new uniform entry
+          const newId = `eq-uni-${Date.now()}-${index}-${Math.floor(Math.random() * 10000)}`;
+          next.unshift({
+            ...item,
+            id: newId,
+          });
+          createdCount++;
+        }
+      });
+      return next;
+    });
+
+    return { createdCount, updatedCount, totalPieces };
+  };
+
+  const addEvent = (eventData: Omit<EventItem, 'id' | 'createdAt'> & { assignments?: Assignment[]; bookedItems?: EventEquipment[] }) => {
     const newEvt: EventItem = {
+      couple: eventData.couple,
+      guests: eventData.guests || [],
+      tables: eventData.tables || [],
+      hostesses: eventData.hostesses || [],
+      catererServers: eventData.catererServers || [],
+      catererCompanyName: eventData.catererCompanyName || '',
+      catererHeadButler: eventData.catererHeadButler || '',
+      catererNotes: eventData.catererNotes || '',
+      beverages: eventData.beverages || [],
+      assignments: eventData.assignments || [],
+      bookedItems: eventData.bookedItems || [],
       ...eventData,
       id: `evt-${Date.now()}`,
-      assignments: [],
-      bookedItems: [],
       createdAt: new Date().toISOString(),
     };
     setEvents((prev) => [newEvt, ...prev]);
@@ -425,6 +494,7 @@ export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         addEquipment,
         updateEquipment,
         deleteEquipment,
+        batchAddOrUpdateUniforms,
         addEvent,
         updateEvent,
         deleteEvent,
