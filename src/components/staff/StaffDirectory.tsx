@@ -21,7 +21,8 @@ import {
   ArrowUpDown,
   FileDown,
   Download,
-  Printer
+  Printer,
+  Crown
 } from 'lucide-react';
 import { exportStaffToCSV, downloadCSV } from '../../utils/exportUtils';
 import { UniformBatchModal } from '../uniforms/UniformBatchModal';
@@ -36,7 +37,7 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, op
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [languageFilter, setLanguageFilter] = useState<string>('ALL');
-  const [vipOnly, setVipOnly] = useState(false);
+  const [accreditationFilter, setAccreditationFilter] = useState<string>('ALL');
   const [selectedStaff, setSelectedStaff] = useState<UserStaff | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<Partial<UserStaff>>({});
@@ -60,9 +61,10 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, op
 
     const matchesCategory = selectedCategory === 'ALL' || staff.staffCategory === selectedCategory;
     const matchesLanguage = languageFilter === 'ALL' || staff.languages.includes(languageFilter);
-    const matchesVip = !vipOnly || staff.vipProtocolCertified;
+    const staffAccreditation = staff.protocolAccreditation || (staff.vipProtocolCertified ? 'VIP' : 'STANDARD');
+    const matchesAccreditation = accreditationFilter === 'ALL' || staffAccreditation === accreditationFilter;
 
-    return matchesSearch && matchesCategory && matchesLanguage && matchesVip;
+    return matchesSearch && matchesCategory && matchesLanguage && matchesAccreditation;
   });
 
   const allLanguages = Array.from(new Set(staffList.flatMap(s => s.languages)));
@@ -185,19 +187,44 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, op
           </div>
         </div>
 
-        {/* Quick Toggles */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-          <div className="flex items-center gap-2">
+        {/* Quick Accreditation Toggles */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-slate-400 font-medium text-[11px] mr-1">Accréditation :</span>
             <button
-              onClick={() => setVipOnly(!vipOnly)}
-              className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-colors flex items-center gap-1 ${
-                vipOnly 
-                  ? 'bg-amber-50 text-amber-900 border-amber-300' 
-                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+              type="button"
+              onClick={() => setAccreditationFilter('ALL')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-colors ${
+                accreditationFilter === 'ALL'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              <Sparkles className="w-3 h-3 text-amber-600" />
-              <span>Certifié Protocole VIP</span>
+              Tous
+            </button>
+            <button
+              type="button"
+              onClick={() => setAccreditationFilter(accreditationFilter === 'PRESTIGE' ? 'ALL' : 'PRESTIGE')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-colors flex items-center gap-1 ${
+                accreditationFilter === 'PRESTIGE'
+                  ? 'bg-amber-100 text-amber-950 border-amber-400 shadow-2xs'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50'
+              }`}
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-600" />
+              <span>Prestige Protocol (Chefs d'État)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAccreditationFilter(accreditationFilter === 'VIP' ? 'ALL' : 'VIP')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-colors flex items-center gap-1 ${
+                accreditationFilter === 'VIP'
+                  ? 'bg-sky-100 text-sky-950 border-sky-400 shadow-2xs'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-sky-50'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+              <span>Accrédité VIP</span>
             </button>
           </div>
 
@@ -211,6 +238,7 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, op
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredStaff.map((staff) => {
           const isAssigned = staff.status === 'ASSIGNED';
+          const accreditation = staff.protocolAccreditation || (staff.vipProtocolCertified ? 'VIP' : 'STANDARD');
           
           return (
             <div
@@ -241,11 +269,15 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, op
                     </div>
                   </div>
 
-                  {staff.vipProtocolCertified && (
-                    <span className="text-[10px] bg-amber-50 text-amber-900 font-bold px-2 py-0.5 rounded border border-amber-200 shrink-0 flex items-center gap-1 uppercase tracking-wider">
-                      <Sparkles className="w-3 h-3 text-amber-600" /> VIP
+                  {accreditation === 'PRESTIGE' ? (
+                    <span className="text-[10px] bg-amber-50 text-amber-900 font-bold px-2.5 py-0.5 rounded-full border border-amber-300 shrink-0 flex items-center gap-1 uppercase tracking-wider shadow-2xs">
+                      <Crown className="w-3 h-3 text-amber-600" /> Prestige
                     </span>
-                  )}
+                  ) : accreditation === 'VIP' ? (
+                    <span className="text-[10px] bg-sky-50 text-sky-800 font-semibold px-2 py-0.5 rounded-full border border-sky-200 shrink-0 flex items-center gap-1 uppercase tracking-wider">
+                      <Sparkles className="w-3 h-3 text-sky-600" /> VIP
+                    </span>
+                  ) : null}
                 </div>
 
                 {/* Sizing & Languages Specs */}
@@ -394,8 +426,10 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, op
                       <strong className="text-slate-900 text-sm font-mono">{selectedStaff.heightCm ? `${selectedStaff.heightCm} cm` : 'N/A'}</strong>
                     </div>
                     <div className="bg-white p-2.5 rounded border border-slate-200">
-                      <span className="text-slate-400 block text-[10px]">Pointure</span>
-                      <strong className="text-slate-900 text-sm font-mono">{selectedStaff.shoeSize || 'N/A'}</strong>
+                      <span className="text-slate-400 block text-[10px]">Souliers / Pointure</span>
+                      <strong className="text-slate-900 text-sm font-mono">
+                        {selectedStaff.shoeSize ? `T.${selectedStaff.shoeSize} (Fournie)` : 'Perso (Dress code)'}
+                      </strong>
                     </div>
                   </div>
                 </div>
@@ -527,33 +561,61 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, op
                 </div>
 
                 {/* Sizing inputs */}
-                <div className="p-3 bg-slate-50 rounded border border-slate-200 grid grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">Taille tenue (ex: 36, 38, 50)</label>
-                    <input
-                      type="text"
-                      value={editFormData.uniformSize || ''}
-                      onChange={(e) => setEditFormData({ ...editFormData, uniformSize: e.target.value })}
-                      className="w-full p-2 border border-slate-300 rounded text-xs font-mono"
-                    />
+                <div className="p-3 bg-slate-50 rounded border border-slate-200 space-y-2.5 text-xs">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">Taille tenue (ex: 36, 38, 50)</label>
+                      <input
+                        type="text"
+                        value={editFormData.uniformSize || ''}
+                        onChange={(e) => setEditFormData({ ...editFormData, uniformSize: e.target.value })}
+                        className="w-full p-2 border border-slate-300 rounded text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">Stature (cm)</label>
+                      <input
+                        type="number"
+                        value={editFormData.heightCm || ''}
+                        onChange={(e) => setEditFormData({ ...editFormData, heightCm: Number(e.target.value) })}
+                        className="w-full p-2 border border-slate-300 rounded text-xs font-mono"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">Stature (cm)</label>
-                    <input
-                      type="number"
-                      value={editFormData.heightCm || ''}
-                      onChange={(e) => setEditFormData({ ...editFormData, heightCm: Number(e.target.value) })}
-                      className="w-full p-2 border border-slate-300 rounded text-xs font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-600 font-medium mb-1">Pointure</label>
-                    <input
-                      type="number"
-                      value={editFormData.shoeSize || ''}
-                      onChange={(e) => setEditFormData({ ...editFormData, shoeSize: Number(e.target.value) })}
-                      className="w-full p-2 border border-slate-300 rounded text-xs font-mono"
-                    />
+
+                  <div className="pt-2 border-t border-slate-200">
+                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(editFormData.shoeSize || editFormData.shoesProvidedByAgency)}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setEditFormData({
+                            ...editFormData,
+                            shoesProvidedByAgency: checked,
+                            shoeSize: checked ? (editFormData.shoeSize || 38) : undefined
+                          });
+                        }}
+                        className="rounded text-amber-600 focus:ring-amber-500"
+                      />
+                      <span>Chaussures d'apparat fournies par l'agence (escarpins hôtesses / richelieus)</span>
+                    </label>
+
+                    {(editFormData.shoeSize || editFormData.shoesProvidedByAgency) ? (
+                      <div className="mt-2 pl-5 max-w-xs animate-in fade-in duration-150">
+                        <label className="block text-slate-600 font-semibold mb-1">Pointure requise (35-47)</label>
+                        <input
+                          type="number"
+                          value={editFormData.shoeSize || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, shoeSize: Number(e.target.value) })}
+                          className="w-full p-2 border border-slate-300 rounded text-xs font-mono"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-slate-400 pl-5 mt-0.5 italic">
+                        Chaussures personnelles soignées (aucun renseignement de pointure requis).
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -568,15 +630,23 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({ openAddModal, op
                 </div>
 
                 <div className="text-xs">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editFormData.vipProtocolCertified || false}
-                      onChange={(e) => setEditFormData({ ...editFormData, vipProtocolCertified: e.target.checked })}
-                      className="rounded text-amber-600 focus:ring-amber-500"
-                    />
-                    <span className="font-semibold text-slate-800">Certifié Protocole & Haute Réception VIP</span>
-                  </label>
+                  <label className="block text-slate-600 font-medium mb-1">Niveau d'Accréditation Protocolaire</label>
+                  <select
+                    value={editFormData.protocolAccreditation || (editFormData.vipProtocolCertified ? 'VIP' : 'STANDARD')}
+                    onChange={(e) => {
+                      const val = e.target.value as 'PRESTIGE' | 'VIP' | 'STANDARD';
+                      setEditFormData({
+                        ...editFormData,
+                        protocolAccreditation: val,
+                        vipProtocolCertified: val !== 'STANDARD'
+                      });
+                    }}
+                    className="w-full p-2 border border-slate-300 rounded text-xs font-semibold"
+                  >
+                    <option value="STANDARD">Personnel Standard Extra (Qualifié - Pas de badge VIP)</option>
+                    <option value="VIP">⭐ Accrédité VIP (Réceptions Officielles & Ambassades)</option>
+                    <option value="PRESTIGE">👑 Prestige Protocol (Sommets & Dignitaires d'État)</option>
+                  </select>
                 </div>
 
                 <div className="text-xs">

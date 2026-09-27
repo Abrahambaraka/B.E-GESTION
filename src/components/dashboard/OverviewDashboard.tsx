@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { NavigationTab } from '../layout/Navbar';
 import { ReportType } from '../export/ExportReportModal';
+import { detectAllOverlapsAndConflicts } from '../../utils/conflictUtils';
 
 interface OverviewDashboardProps {
   setActiveTab: (tab: NavigationTab) => void;
@@ -92,6 +93,66 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
       type: 'info',
       title: `${unassignedUniformCount} Tenue(s) à calibrer`,
       desc: 'Affectez les uniformes aux hôtesses et maîtres d’hôtel selon leurs mensurations.',
+      actionTab: 'uniforms'
+    });
+  }
+
+  // Check scheduling date overlaps and multi-event staff conflicts
+  const overlapReports = detectAllOverlapsAndConflicts(events);
+  const totalOverlappingDates = overlapReports.length;
+  const criticalStaffConflicts = overlapReports.flatMap(r => r.staffConflicts);
+
+  if (criticalStaffConflicts.length > 0) {
+    alerts.push({
+      id: 'alt-staff-schedule-conflicts',
+      type: 'critical',
+      title: `Conflit RH : ${criticalStaffConflicts.length} doublon(s) d'affectation détecté(s)`,
+      desc: `${criticalStaffConflicts[0].staffName} est programmé(e) simultanément sur "${criticalStaffConflicts[0].eventTitles[0]}" et "${criticalStaffConflicts[0].eventTitles[1]}". Risque opérationnel direct.`,
+      actionTab: 'events'
+    });
+  } else if (totalOverlappingDates > 0) {
+    alerts.push({
+      id: 'alt-date-overlaps',
+      type: 'warning',
+      title: `Vigilance : ${totalOverlappingDates} date(s) avec réceptions simultanées`,
+      desc: `Des galas se déroulent le même soir (${overlapReports[0].date} : ${overlapReports[0].events.map(e => e.title.slice(0, 25) + '...').join(' & ')}). Surveillez la charge RH et matérielle.`,
+      actionTab: 'events'
+    });
+  }
+
+  // Critical uniform stock alerts for key hostess sizes (T.36 and T.38)
+  const uniforms = equipmentList.filter(e => e.category === 'UNIFORM');
+  const uniformT36 = uniforms.find(u => u.sizeOrDimensions?.includes('36'));
+  const uniformT38 = uniforms.find(u => u.sizeOrDimensions?.includes('38'));
+  const stockT36 = uniformT36?.availableQty ?? 0;
+  const stockT38 = uniformT38?.availableQty ?? 0;
+
+  // Active or upcoming hostesses needing size 36 and 38
+  const assignedHostesses = staffList.filter(s => s.status === 'ASSIGNED');
+  const needT36 = assignedHostesses.filter(s => s.uniformSize === '36').length;
+  const needT38 = assignedHostesses.filter(s => s.uniformSize === '38').length;
+
+  const isRuptureT36 = stockT36 === 0 || stockT36 < needT36;
+  const isRuptureT38 = stockT38 === 0 || stockT38 < needT38;
+
+  if (isRuptureT36 || isRuptureT38) {
+    const rupturedDetails: string[] = [];
+    if (isRuptureT36) rupturedDetails.push(`Taille 36 (${stockT36} dispo / ${needT36} mobilisée${needT36 > 1 ? 's' : ''})`);
+    if (isRuptureT38) rupturedDetails.push(`Taille 38 (${stockT38} dispo / ${needT38} mobilisée${needT38 > 1 ? 's' : ''})`);
+
+    alerts.push({
+      id: 'alt-uniform-rupture-sizes',
+      type: 'critical',
+      title: `Rupture Vestiaire Hôtesses : ${rupturedDetails.join(' & ')}`,
+      desc: `Risque opérationnel Jour J réel : plusieurs hôtesses affectées sur les galas n'ont pas de tenue garantie à leur taille. Réapprovisionnez immédiatement.`,
+      actionTab: 'uniforms'
+    });
+  } else if (stockT36 <= 2 || stockT38 <= 2) {
+    alerts.push({
+      id: 'alt-uniform-low-sizes',
+      type: 'warning',
+      title: `Tension Vestiaire : Tailles Hôtesses 36 & 38`,
+      desc: `Stock restant très bas (T.36: ${stockT36} dispo, T.38: ${stockT38} dispo). Risque de pénurie sur les prochaines affectations.`,
       actionTab: 'uniforms'
     });
   }

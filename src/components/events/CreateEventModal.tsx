@@ -28,8 +28,12 @@ import {
   Info,
   CheckCircle2,
   DollarSign,
-  Layers
+  Layers,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { checkStaffConflict } from '../../utils/conflictUtils';
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -39,7 +43,7 @@ interface CreateEventModalProps {
 type TabType = 'GENERAL' | 'COUPLE_GUESTS' | 'TABLES' | 'HOSTESSES' | 'CATERER' | 'BEVERAGES';
 
 export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose }) => {
-  const { addEvent, staffList } = useEvent();
+  const { addEvent, staffList, events } = useEvent();
 
   const [activeTab, setActiveTab] = useState<TabType>('GENERAL');
 
@@ -349,6 +353,58 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
   const totalSeats = tables.reduce((acc, t) => acc + (t.capacity || 0), 0);
   const totalBottles = beverages.reduce((acc, b) => acc + (b.quantityOrdered || 0), 0);
 
+  const TABS: { id: TabType; title: string; stepNumber: number; icon: any }[] = [
+    { id: 'GENERAL', title: '1. Général & Protocole', stepNumber: 1, icon: Calendar },
+    { id: 'COUPLE_GUESTS', title: `2. Couple & Invités (${guests.length})`, stepNumber: 2, icon: Heart },
+    { id: 'TABLES', title: `3. Plan de Tables (${tables.length})`, stepNumber: 3, icon: Grid },
+    { id: 'HOSTESSES', title: `4. Hôtesses (${hostesses.length})`, stepNumber: 4, icon: UserCheck },
+    { id: 'CATERER', title: `5. Traiteur & Serveurs (${catererServers.length})`, stepNumber: 5, icon: UtensilsCrossed },
+    { id: 'BEVERAGES', title: `6. Boissons & Bar (${beverages.length})`, stepNumber: 6, icon: Wine },
+  ];
+
+  const isTabCompleted = (tab: TabType): boolean => {
+    switch (tab) {
+      case 'GENERAL':
+        return Boolean(title.trim() && clientName.trim() && location.trim());
+      case 'COUPLE_GUESTS':
+        return Boolean((hasCouple && (partner1.trim() || partner2.trim())) || guests.length > 0);
+      case 'TABLES':
+        return tables.length > 0;
+      case 'HOSTESSES':
+        return hostesses.length > 0;
+      case 'CATERER':
+        return Boolean(catererCompanyName.trim() || catererServers.length > 0);
+      case 'BEVERAGES':
+        return beverages.length > 0;
+      default:
+        return false;
+    }
+  };
+
+  const completedCount = TABS.filter(t => isTabCompleted(t.id)).length;
+  const currentTabIndex = TABS.findIndex(t => t.id === activeTab);
+
+  const handleNextStep = () => {
+    if (currentTabIndex < TABS.length - 1) {
+      setActiveTab(TABS[currentTabIndex + 1].id);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentTabIndex > 0) {
+      setActiveTab(TABS[currentTabIndex - 1].id);
+    }
+  };
+
+  // Conflict check for selected hostess and server
+  const selectedHostessConflict = selectedStaffHostessId
+    ? checkStaffConflict(selectedStaffHostessId, startDate, events)
+    : { hasConflict: false };
+
+  const selectedServerConflict = selectedStaffServerId
+    ? checkStaffConflict(selectedStaffServerId, startDate, events)
+    : { hasConflict: false };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !clientName || !location) {
@@ -401,7 +457,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-      <div className="bg-white border border-slate-200 rounded-xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white border border-slate-200 rounded-xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white shrink-0">
@@ -424,6 +480,30 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Wizard Stepper Progress Bar */}
+        <div className="bg-slate-900/95 text-white px-6 py-2.5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-bold font-mono text-[11px]">
+              Étape {currentTabIndex + 1} / {TABS.length}
+            </span>
+            <span className="font-semibold text-slate-200 text-xs">
+              {TABS[currentTabIndex].title}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] text-slate-300">
+              Progression : <strong className="text-emerald-400 font-mono">{completedCount}</strong> / {TABS.length} volets complétés
+            </span>
+            <div className="w-28 sm:w-36 bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
+              <div 
+                className="bg-emerald-400 h-full transition-all duration-300"
+                style={{ width: `${(completedCount / TABS.length) * 100}%` }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Templates Quick Bar */}
@@ -449,73 +529,37 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="bg-slate-50 border-b border-slate-200 px-6 flex items-center gap-1 overflow-x-auto shrink-0 scrollbar-none py-1.5">
-          <button
-            type="button"
-            onClick={() => setActiveTab('GENERAL')}
-            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors whitespace-nowrap ${
-              activeTab === 'GENERAL' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-            }`}
-          >
-            <Calendar className="w-3.5 h-3.5" />
-            1. Général & Protocole
-          </button>
+        {/* Tab Navigation with Completion Checkmarks */}
+        <div className="bg-slate-50 border-b border-slate-200 px-6 flex items-center gap-1.5 overflow-x-auto shrink-0 scrollbar-none py-2">
+          {TABS.map((tab) => {
+            const isCompleted = isTabCompleted(tab.id);
+            const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('COUPLE_GUESTS')}
-            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors whitespace-nowrap ${
-              activeTab === 'COUPLE_GUESTS' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-            }`}
-          >
-            <Heart className="w-3.5 h-3.5 text-rose-500" />
-            2. Couple & Invités ({guests.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('TABLES')}
-            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors whitespace-nowrap ${
-              activeTab === 'TABLES' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-            }`}
-          >
-            <Grid className="w-3.5 h-3.5 text-indigo-500" />
-            3. Plan de Tables ({tables.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('HOSTESSES')}
-            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors whitespace-nowrap ${
-              activeTab === 'HOSTESSES' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-            }`}
-          >
-            <UserCheck className="w-3.5 h-3.5 text-amber-500" />
-            4. Hôtesses ({hostesses.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('CATERER')}
-            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors whitespace-nowrap ${
-              activeTab === 'CATERER' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-            }`}
-          >
-            <UtensilsCrossed className="w-3.5 h-3.5 text-emerald-600" />
-            5. Traiteur & Serveurs ({catererServers.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('BEVERAGES')}
-            className={`px-3 py-2 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors whitespace-nowrap ${
-              activeTab === 'BEVERAGES' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
-            }`}
-          >
-            <Wine className="w-3.5 h-3.5 text-purple-600" />
-            6. Boissons & Bar ({beverages.length})
-          </button>
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap border ${
+                  isActive 
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {isCompleted ? (
+                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0" title="Volet complété">
+                    ✓
+                  </span>
+                ) : (
+                  <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-mono shrink-0">
+                    {tab.stepNumber}
+                  </span>
+                )}
+                <span>{tab.title}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Modal Body / Tab Panes */}
@@ -646,13 +690,40 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Budget Logistique & RH (€)</label>
-                  <input
-                    type="number"
-                    value={budget}
-                    onChange={(e) => setBudget(Number(e.target.value))}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-1 focus:ring-amber-500 focus:outline-none text-slate-900 font-mono"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-semibold text-slate-700">Budget Logistique & RH</label>
+                    <span className="text-xs font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(budget || 0)}
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      step="500"
+                      value={budget}
+                      onChange={(e) => setBudget(Number(e.target.value))}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-1 focus:ring-amber-500 focus:outline-none text-slate-900 font-mono font-bold text-sm pr-14"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs pointer-events-none">€ EUR</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className="text-[10px] text-slate-400 font-medium">Ajustement :</span>
+                    <button
+                      type="button"
+                      onClick={() => setBudget(b => (b || 0) + 5000)}
+                      className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold border border-slate-200"
+                    >
+                      +5 000 €
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBudget(b => (b || 0) + 10000)}
+                      className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold border border-slate-200"
+                    >
+                      +10 000 €
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1003,7 +1074,22 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
               </div>
 
               {/* Add Hostess Form */}
-              <form onSubmit={handleAddHostess} className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+              <form onSubmit={handleAddHostess} className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5">
+                {selectedHostessConflict.hasConflict && (
+                  <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-xs text-amber-950 flex items-start gap-2 animate-in fade-in duration-150">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-amber-900 block">⚠️ Conflit de planning détecté !</span>
+                      <p className="text-[11px] text-amber-800 mt-0.5">
+                        Cette hôtesse est déjà mobilisée le <strong>{selectedHostessConflict.conflictingEventDate}</strong> ({selectedHostessConflict.conflictingEventTime}) sur <em>« {selectedHostessConflict.conflictingEventTitle} »</em> en tant que <strong>{selectedHostessConflict.conflictingRole}</strong>.
+                      </p>
+                      <span className="text-[10px] text-amber-700 italic block mt-0.5">
+                        Risque opérationnel de double affectation le même soir.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Depuis l'annuaire d'équipe</label>
@@ -1016,9 +1102,15 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
                       className="w-full p-2 bg-white border border-slate-200 rounded-md focus:ring-1 focus:ring-amber-500 focus:outline-none text-slate-900"
                     >
                       <option value="">-- Choisir une hôtesse existante --</option>
-                      {staffList.filter(s => s.staffCategory === 'HOSTESS' || s.role === 'STAFF').map(s => (
-                        <option key={s.id} value={s.id}>{s.fullName} ({s.languages.join('/')} • T.{s.uniformSize || '38'})</option>
-                      ))}
+                      {staffList.filter(s => s.staffCategory === 'HOSTESS' || s.role === 'STAFF').map(s => {
+                        const conflict = checkStaffConflict(s.id, startDate, events);
+                        return (
+                          <option key={s.id} value={s.id}>
+                            {s.fullName} ({s.languages.join('/')} • T.{s.uniformSize || '38'})
+                            {conflict.hasConflict ? ` ⚠️ (Déjà sur: ${conflict.conflictingEventTitle?.slice(0, 18)}...)` : ''}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   <div>
@@ -1090,28 +1182,41 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 bg-white">
-                    {hostesses.map((h) => (
-                      <tr key={h.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-2 font-bold text-slate-900 flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-[10px] font-bold">
-                            {h.fullName.slice(0, 2).toUpperCase()}
-                          </span>
-                          <span>{h.fullName}</span>
-                        </td>
-                        <td className="p-2 text-slate-700 font-semibold">{h.assignedPost}</td>
-                        <td className="p-2 text-slate-500">{h.uniformInfo || 'Non spécifié'}</td>
-                        <td className="p-2 font-mono text-slate-600">{h.shiftTime || 'Journée'}</td>
-                        <td className="p-2 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveHostess(h.id)}
-                            className="text-slate-400 hover:text-rose-600 p-1"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {hostesses.map((h) => {
+                      const conflict = h.staffId ? checkStaffConflict(h.staffId, startDate, events) : null;
+                      return (
+                        <tr key={h.id} className={`hover:bg-slate-50 transition-colors ${conflict?.hasConflict ? 'bg-amber-50/50' : ''}`}>
+                          <td className="p-2 font-bold text-slate-900">
+                            <div className="flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-[10px] font-bold">
+                                {h.fullName.slice(0, 2).toUpperCase()}
+                              </span>
+                              <div>
+                                <span>{h.fullName}</span>
+                                {conflict?.hasConflict && (
+                                  <span className="block text-[10px] text-amber-700 font-semibold flex items-center gap-1 mt-0.5">
+                                    <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                    Déjà sur « {conflict.conflictingEventTitle?.slice(0, 22)}... »
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-2 text-slate-700 font-semibold">{h.assignedPost}</td>
+                          <td className="p-2 text-slate-500">{h.uniformInfo || 'Non spécifié'}</td>
+                          <td className="p-2 font-mono text-slate-600">{h.shiftTime || 'Journée'}</td>
+                          <td className="p-2 text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveHostess(h.id)}
+                              className="text-slate-400 hover:text-rose-600 p-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {hostesses.length === 0 && (
                       <tr>
                         <td colSpan={5} className="p-4 text-center text-slate-400">
@@ -1173,7 +1278,22 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
                   Brigade des Serveurs du Traiteur ({catererServers.length})
                 </span>
 
-                <form onSubmit={handleAddServer} className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                <form onSubmit={handleAddServer} className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5">
+                  {selectedServerConflict.hasConflict && (
+                    <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-xs text-amber-950 flex items-start gap-2 animate-in fade-in duration-150">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-amber-900 block">⚠️ Conflit de planning détecté !</span>
+                        <p className="text-[11px] text-amber-800 mt-0.5">
+                          Ce collaborateur est déjà mobilisé le <strong>{selectedServerConflict.conflictingEventDate}</strong> ({selectedServerConflict.conflictingEventTime}) sur <em>« {selectedServerConflict.conflictingEventTitle} »</em> en tant que <strong>{selectedServerConflict.conflictingRole}</strong>.
+                        </p>
+                        <span className="text-[10px] text-amber-700 italic block mt-0.5">
+                          Risque opérationnel de double affectation le même soir.
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
                       <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Depuis l'annuaire extra</label>
@@ -1186,9 +1306,15 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
                         className="w-full p-2 bg-white border border-slate-200 rounded-md focus:ring-1 focus:ring-emerald-500 focus:outline-none text-slate-900"
                       >
                         <option value="">-- Choisir un serveur existant --</option>
-                        {staffList.filter(s => s.staffCategory === 'SERVER' || s.staffCategory === 'BUTLER').map(s => (
-                          <option key={s.id} value={s.id}>{s.fullName} ({s.staffCategory})</option>
-                        ))}
+                        {staffList.filter(s => s.staffCategory === 'SERVER' || s.staffCategory === 'BUTLER').map(s => {
+                          const conflict = checkStaffConflict(s.id, startDate, events);
+                          return (
+                            <option key={s.id} value={s.id}>
+                              {s.fullName} ({s.staffCategory})
+                              {conflict.hasConflict ? ` ⚠️ (Déjà sur: ${conflict.conflictingEventTitle?.slice(0, 18)}...)` : ''}
+                            </option>
+                          );
+                        })}
                       </select>
                     </div>
                     <div>
@@ -1265,27 +1391,40 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
-                      {catererServers.map((s) => (
-                        <tr key={s.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-2 font-bold text-slate-900">{s.fullName}</td>
-                          <td className="p-2">
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-900">
-                              {s.role}
-                            </span>
-                          </td>
-                          <td className="p-2 text-slate-700 font-medium">{s.assignedZone}</td>
-                          <td className="p-2 font-mono text-slate-500">{s.shiftTime || 'Soirée'}</td>
-                          <td className="p-2 text-right">
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveServer(s.id)}
-                              className="text-slate-400 hover:text-rose-600 p-1"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {catererServers.map((s) => {
+                        const conflict = s.staffId ? checkStaffConflict(s.staffId, startDate, events) : null;
+                        return (
+                          <tr key={s.id} className={`hover:bg-slate-50 transition-colors ${conflict?.hasConflict ? 'bg-amber-50/50' : ''}`}>
+                            <td className="p-2 font-bold text-slate-900">
+                              <div className="flex items-center gap-2">
+                                <span>{s.fullName}</span>
+                                {conflict?.hasConflict && (
+                                  <span className="text-[10px] text-amber-700 font-semibold flex items-center gap-1">
+                                    <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                    Déjà sur « {conflict.conflictingEventTitle?.slice(0, 18)}... »
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-2">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-900">
+                                {s.role}
+                              </span>
+                            </td>
+                            <td className="p-2 text-slate-700 font-medium">{s.assignedZone}</td>
+                            <td className="p-2 font-mono text-slate-500">{s.shiftTime || 'Soirée'}</td>
+                            <td className="p-2 text-right">
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveServer(s.id)}
+                                className="text-slate-400 hover:text-rose-600 p-1"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1427,8 +1566,8 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
 
         </div>
 
-        {/* Modal Footer */}
-        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        {/* Modal Footer with Stepper Actions */}
+        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3 text-slate-500 text-[11px]">
             <span>{tables.length} tables ({totalSeats} pl.)</span>
             <span>•</span>
@@ -1443,17 +1582,40 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 text-xs font-bold uppercase tracking-wider transition-colors"
+              className="px-3.5 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 text-xs font-bold uppercase tracking-wider transition-colors"
             >
               Annuler
             </button>
+
+            {/* Stepper Prev / Next Buttons */}
+            <button
+              type="button"
+              onClick={handlePrevStep}
+              disabled={currentTabIndex === 0}
+              className="px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Précédent</span>
+            </button>
+
+            {currentTabIndex < TABS.length - 1 ? (
+              <button
+                type="button"
+                onClick={handleNextStep}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1 shadow-xs"
+              >
+                <span>Suivant</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : null}
+
             <button
               type="button"
               onClick={handleSubmit}
               className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow-sm transition-colors flex items-center gap-1.5"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Valider & Enregistrer l'Événement</span>
+              <span>Enregistrer l'Événement</span>
             </button>
           </div>
         </div>

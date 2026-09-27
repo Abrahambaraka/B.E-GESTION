@@ -24,9 +24,10 @@ import { UniformBatchModal } from '../uniforms/UniformBatchModal';
 
 interface EquipmentInventoryProps {
   openExportModal?: (type?: any) => void;
+  onNavigateToUniforms?: () => void;
 }
 
-export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExportModal }) => {
+export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExportModal, onNavigateToUniforms }) => {
   const { equipmentList, addEquipment, updateEquipment, deleteEquipment } = useEvent();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,7 +79,9 @@ export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExpo
   // Count stats by domain
   const decoCount = equipmentList.filter((e) => e.domain === 'DECORATION').length;
   const cateringCount = equipmentList.filter((e) => e.domain === 'CATERING').length;
-  const wardrobeCount = equipmentList.filter((e) => e.domain === 'WARDROBE').length;
+  const wardrobeItems = equipmentList.filter((e) => e.domain === 'WARDROBE');
+  const wardrobeCount = wardrobeItems.length;
+  const totalUniformPieces = wardrobeItems.reduce((sum, e) => sum + e.totalQty, 0);
 
   const getDomainLabel = (dom: LogisticsDomain) => {
     switch (dom) {
@@ -252,7 +255,7 @@ export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExpo
         {/* Vestiaire Card */}
         <div 
           onClick={() => handleDomainChange('WARDROBE')}
-          className={`cursor-pointer border rounded-lg p-4 transition-all ${
+          className={`cursor-pointer border rounded-lg p-4 transition-all relative ${
             selectedDomain === 'WARDROBE' 
               ? 'bg-purple-50/60 border-purple-400 ring-2 ring-purple-400/20 shadow-xs' 
               : 'bg-white border-slate-200 hover:border-purple-300 hover:shadow-xs'
@@ -264,14 +267,34 @@ export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExpo
                 <Shirt className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-serif font-bold text-slate-900 text-sm">Pôle Vestiaire & Uniformes</h3>
-                <span className="text-[11px] text-slate-500">Tailleurs hôtesses, smokings serveurs & gants</span>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-serif font-bold text-slate-900 text-sm">Pôle Vestiaire & Dressing</h3>
+                  <span className="text-[9px] font-bold bg-purple-100 text-purple-800 px-1.5 py-0.2 rounded border border-purple-200 uppercase">
+                    Catalogue Partagé
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-500">Tailleurs hôtesses & smokings ({totalUniformPieces} pièces)</span>
               </div>
             </div>
-            <span className="font-mono font-bold text-base text-purple-800 bg-purple-100/70 px-2 py-0.5 rounded border border-purple-200">
-              {wardrobeCount}
-            </span>
+            <div className="text-right">
+              <span className="font-mono font-bold text-base text-purple-800 bg-purple-100/70 px-2 py-0.5 rounded border border-purple-200">
+                {wardrobeCount} mod.
+              </span>
+              <span className="block text-[10px] text-slate-400 font-mono mt-0.5">{totalUniformPieces} pièces</span>
+            </div>
           </div>
+          {onNavigateToUniforms && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigateToUniforms();
+              }}
+              className="mt-2.5 w-full py-1 px-2 rounded bg-purple-100/80 hover:bg-purple-200 text-purple-950 text-[10px] font-bold border border-purple-200 flex items-center justify-center gap-1 transition-colors"
+            >
+              <span>Accéder au Vestiaire Spécialisé (Tailles, Mensurations & Pressing) ↗</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -462,6 +485,32 @@ export const EquipmentInventory: React.FC<EquipmentInventoryProps> = ({ openExpo
           </span>
         </div>
       </div>
+
+      {/* Clarification banner when Vestiaire domain is selected */}
+      {selectedDomain === 'WARDROBE' && (
+        <div className="p-3.5 bg-purple-50/80 border border-purple-200 rounded-lg text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-purple-950">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-md bg-purple-100 text-purple-800 shrink-0">
+              <Shirt className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold block text-sm">Catalogue Vestiaire Unifié</span>
+              <p className="text-[11px] text-purple-800/90 mt-0.5">
+                Ces {wardrobeCount} modèles ({totalUniformPieces} pièces au total) proviennent de la base de données centrale partagée en temps réel avec le module <strong>Vestiaire & Tenues</strong>. Les stocks sont synchronisés automatiquement.
+              </p>
+            </div>
+          </div>
+          {onNavigateToUniforms && (
+            <button
+              type="button"
+              onClick={onNavigateToUniforms}
+              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md font-bold uppercase tracking-wider text-[10px] shrink-0 transition-colors shadow-xs"
+            >
+              Ouvrir le Dressing Spécialisé ↗
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Equipment Table / Grid */}
       <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs">

@@ -178,6 +178,7 @@ function AppContent() {
             {activeTab === 'logistics' && (
               <EquipmentInventory 
                 openExportModal={handleOpenExport}
+                onNavigateToUniforms={() => setActiveTab('uniforms')}
               />
             )}
 

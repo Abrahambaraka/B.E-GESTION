@@ -19,9 +19,10 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose })
   const [languagesInput, setLanguagesInput] = useState('FR, EN');
   const [uniformSize, setUniformSize] = useState('38');
   const [heightCm, setHeightCm] = useState<number>(175);
+  const [shoesProvidedByAgency, setShoesProvidedByAgency] = useState<boolean>(false);
   const [shoeSize, setShoeSize] = useState<number>(38);
   const [experienceYears, setExperienceYears] = useState<number>(3);
-  const [vipProtocolCertified, setVipProtocolCertified] = useState<boolean>(true);
+  const [protocolAccreditation, setProtocolAccreditation] = useState<'PRESTIGE' | 'VIP' | 'STANDARD'>('STANDARD');
   const [notes, setNotes] = useState('');
 
   if (!isOpen) return null;
@@ -44,9 +45,11 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose })
       languages: languages.length > 0 ? languages : ['FR'],
       uniformSize,
       heightCm: Number(heightCm) || undefined,
-      shoeSize: Number(shoeSize) || undefined,
+      shoeSize: shoesProvidedByAgency ? (Number(shoeSize) || undefined) : undefined,
+      shoesProvidedByAgency,
       experienceYears: Number(experienceYears) || 0,
-      vipProtocolCertified,
+      vipProtocolCertified: protocolAccreditation !== 'STANDARD',
+      protocolAccreditation,
       notes,
       status: 'AVAILABLE',
     });
@@ -133,9 +136,9 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose })
           {/* Sizing & Mensurations Section */}
           <div className="p-3 bg-slate-50 border border-slate-200 rounded-md space-y-2.5">
             <span className="font-bold text-slate-800 flex items-center gap-1">
-              <Shirt className="w-3.5 h-3.5 text-amber-600" /> Mensurations pour attribution des tenues
+              <Shirt className="w-3.5 h-3.5 text-amber-600" /> Mensurations & Vestiaire
             </span>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-slate-500 text-[11px] mb-0.5">Taille tenue (36-54)</label>
                 <input
@@ -156,16 +159,40 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose })
                   className="w-full p-1.5 border border-slate-200 rounded-md bg-white text-slate-900 font-mono"
                 />
               </div>
-              <div>
-                <label className="block text-slate-500 text-[11px] mb-0.5">Pointure</label>
+            </div>
+
+            {/* Optional shoe sizing only if agency provides shoes */}
+            <div className="pt-2 border-t border-slate-200/60">
+              <label className="flex items-center gap-2 cursor-pointer text-[11px] font-semibold text-slate-700">
                 <input
-                  type="number"
-                  placeholder="39"
-                  value={shoeSize}
-                  onChange={(e) => setShoeSize(Number(e.target.value))}
-                  className="w-full p-1.5 border border-slate-200 rounded-md bg-white text-slate-900 font-mono"
+                  type="checkbox"
+                  checked={shoesProvidedByAgency}
+                  onChange={(e) => setShoesProvidedByAgency(e.target.checked)}
+                  className="rounded border-slate-300 text-amber-500 focus:ring-amber-500"
                 />
-              </div>
+                <span>L'agence fournit les chaussures d'apparat (escarpins hôtesses / richelieus service)</span>
+              </label>
+
+              {shoesProvidedByAgency ? (
+                <div className="mt-2 pl-5 max-w-xs animate-in fade-in duration-150">
+                  <label className="block text-slate-600 text-[11px] mb-0.5 font-semibold">
+                    Pointure requise (36-46)
+                  </label>
+                  <input
+                    type="number"
+                    min="34"
+                    max="48"
+                    placeholder="Ex: 38"
+                    value={shoeSize || ''}
+                    onChange={(e) => setShoeSize(Number(e.target.value))}
+                    className="w-full p-1.5 border border-slate-200 rounded-md bg-white text-slate-900 font-mono"
+                  />
+                </div>
+              ) : (
+                <p className="text-[10px] text-slate-400 pl-5 mt-0.5 italic">
+                  Chaussures personnelles soignées portées par le collaborateur (formulaire allégé).
+                </p>
+              )}
             </div>
           </div>
 
@@ -193,17 +220,17 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose })
             </div>
           </div>
 
-          <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-md">
-            <input
-              type="checkbox"
-              id="new-staff-vip"
-              checked={vipProtocolCertified}
-              onChange={(e) => setVipProtocolCertified(e.target.checked)}
-              className="rounded text-amber-600 focus:ring-amber-500"
-            />
-            <label htmlFor="new-staff-vip" className="cursor-pointer font-bold text-amber-950 flex items-center gap-1 text-xs">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Habilité Protocole d'État & Haute Réception VIP
-            </label>
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Niveau d'Accréditation Protocolaire</label>
+            <select
+              value={protocolAccreditation}
+              onChange={(e) => setProtocolAccreditation(e.target.value as any)}
+              className="w-full p-2 bg-slate-50 border border-slate-200 rounded-md focus:ring-1 focus:ring-amber-500 focus:outline-none text-slate-900 font-medium"
+            >
+              <option value="STANDARD">Personnel Standard Extra (Qualifié - Pas de badge VIP)</option>
+              <option value="VIP">⭐ Accrédité VIP (Réceptions Officielles & Ambassades)</option>
+              <option value="PRESTIGE">👑 Prestige Protocol (Sommets & Dignitaires d'État)</option>
+            </select>
           </div>
 
           <div>

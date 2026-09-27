@@ -41,12 +41,15 @@ import {
   Info,
   GlassWater,
   Minus,
-  Search
+  Search,
+  LayoutList,
+  CalendarRange
 } from 'lucide-react';
 import { NavigationTab } from '../layout/Navbar';
 import { EditEventModal } from './EditEventModal';
 import { exportEventsToCSV, exportEventRoadmapToCSV, downloadCSV } from '../../utils/exportUtils';
 import { UniformBatchModal } from '../uniforms/UniformBatchModal';
+import { EventCalendarTimeline } from './EventCalendarTimeline';
 
 interface EventManagementProps {
   setActiveTab: (tab: NavigationTab) => void;
@@ -79,6 +82,7 @@ export const EventManagement: React.FC<EventManagementProps> = ({
   } = useEvent();
 
   const [activeSubTab, setActiveSubTab] = useState<EventSubTab>('DETAILS');
+  const [viewMode, setViewMode] = useState<'LIST' | 'CALENDAR'>('LIST');
   const [selectedEquipToAdd, setSelectedEquipToAdd] = useState<string>('');
   const [qtyToAdd, setQtyToAdd] = useState<number>(10);
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -410,7 +414,37 @@ export const EventManagement: React.FC<EventManagementProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {/* Mode Switcher: List vs Calendar/Timeline */}
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+            <button
+              type="button"
+              id="event-view-list-btn"
+              onClick={() => setViewMode('LIST')}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                viewMode === 'LIST'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <LayoutList className="w-3.5 h-3.5" />
+              <span>Liste & Fiches</span>
+            </button>
+            <button
+              type="button"
+              id="event-view-calendar-btn"
+              onClick={() => setViewMode('CALENDAR')}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                viewMode === 'CALENDAR'
+                  ? 'bg-amber-500 text-white shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <CalendarRange className="w-3.5 h-3.5" />
+              <span>Calendrier & Timeline</span>
+            </button>
+          </div>
+
           <button
             onClick={handleExportAllEvents}
             className="px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded text-xs font-medium transition-colors flex items-center gap-1 border border-slate-200"
@@ -430,8 +464,27 @@ export const EventManagement: React.FC<EventManagementProps> = ({
         </div>
       </div>
 
-      {/* Main Split Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {viewMode === 'CALENDAR' ? (
+        <EventCalendarTimeline
+          events={events}
+          selectedEventId={selectedEventId}
+          onSelectEvent={(id) => setSelectedEventId(id)}
+          onOpenEditModal={(evt) => {
+            setEventToEdit(evt);
+            setIsEditModalOpen(true);
+          }}
+          onSwitchToListView={(id) => {
+            if (id) setSelectedEventId(id);
+            setViewMode('LIST');
+          }}
+          openCreateModal={openCreateModal}
+          staffList={staffList}
+          equipmentList={equipmentList}
+          openExportModal={openExportModal}
+        />
+      ) : (
+        /* Main Split Grid */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column: Event List (4 cols) */}
         <div className="lg:col-span-4 space-y-3">
@@ -2061,6 +2114,7 @@ export const EventManagement: React.FC<EventManagementProps> = ({
           </div>
         )}
       </div>
+      )}
 
       {/* Edit Event Modal */}
       <EditEventModal

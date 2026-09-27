@@ -21,6 +21,8 @@ export type Condition = 'EXCELLENT' | 'BON' | 'MOYEN' | 'EN_REVISION' | 'PRESSIN
 
 export type CheckInStatus = 'PRESENT' | 'LATE' | 'ABSENT' | 'EXCUSED' | 'PENDING';
 
+export type ProtocolAccreditation = 'PRESTIGE' | 'VIP' | 'STANDARD';
+
 export interface UserStaff {
   id: string;
   email: string;
@@ -31,9 +33,11 @@ export interface UserStaff {
   languages: string[]; // Ex: ["FR", "EN", "ES", "AR", "ZH"]
   uniformSize?: string; // Ex: "S", "M", "L", "38", "40", "42", "50"
   heightCm?: number; // Ex: 175
-  shoeSize?: number; // Ex: 39
+  shoeSize?: number; // Ex: 39 (Optionnel, si souliers fournis)
+  shoesProvidedByAgency?: boolean;
   experienceYears?: number;
   vipProtocolCertified?: boolean;
+  protocolAccreditation?: ProtocolAccreditation; // 'PRESTIGE' | 'VIP' | 'STANDARD'
   avatarUrl?: string;
   notes?: string;
   status?: 'AVAILABLE' | 'ASSIGNED' | 'UNAVAILABLE';
